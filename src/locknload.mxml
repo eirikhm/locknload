@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application
+	xmlns:mx="http://www.adobe.com/2006/mxml"
+	 layout="absolute"
+	 applicationComplete="onAppComplete()">
+	<mx:Script>
+		<![CDATA[
+			import com.smashingwindmills.ui.Game;
+			import com.smashingwindmills.ui.DisplayObjectUIComponent;
+			
+			
+			private function onAppComplete():void
+			{
+				
+				addChild(new DisplayObjectUIComponent(new Game()));
+			}
+			
+		]]>
+	</mx:Script>
+</mx:Application>
