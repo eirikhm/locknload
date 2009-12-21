@@ -15,13 +15,16 @@ package com.smashingwindmills.game
 
 		protected static const BULLET_VELOCITY:Number = 360;
 		protected static const BULLET_BOOST:Number = 36;
+		public var BULLET_DAMAGE:Number = 0.5;
 		  
 		protected var bullets:Array;
 		protected var currentBullet:uint = 0;
 		protected var aimingUp:Boolean = false;
 		protected var aimingDown:Boolean = false;
 
-
+		public var level:int = 1;
+		protected var experience:int = 0;
+		
 		protected var is_double:Boolean = false;
 		public function Player(playerBullets:Array)
 		{
@@ -47,6 +50,14 @@ package com.smashingwindmills.game
 		
 		override public function update():void
 		{
+			
+			if (FlxG.score > 100)
+			{
+				level = 2;
+				BULLET_DAMAGE = 2;
+			}
+						
+			
 			aimingDown = false;
 			aimingUp = false;
 			
@@ -129,8 +140,6 @@ package com.smashingwindmills.game
 			}
 			
 			super.update();
-		
 		}
-
 	}
 }

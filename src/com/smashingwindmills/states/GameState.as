@@ -6,9 +6,14 @@ package com.smashingwindmills.states
 	import com.smashingwindmills.maps.MapBase;
 	import com.smashingwindmills.maps.MapLevel01;
 	
+	import flash.geom.Point;
+	
 	import org.flixel.FlxG;
+	import org.flixel.FlxLayer;
 	import org.flixel.FlxSprite;
 	import org.flixel.FlxState;
+	import org.flixel.FlxText;
+	import org.flixel.FlxTilemap;
 	
 	public class GameState extends FlxState
 	{
@@ -25,17 +30,28 @@ package com.smashingwindmills.states
 		[Embed(source="../media/music/ugress.mp3")] 
 		protected var MusicMode:Class;
 
-
+		private var _xpDisplay:FlxText;
+		private var _levelDisplay:FlxText;
+		
+        public static var lyrHUD:FlxLayer;
 		public function GameState()
 		{
-			
+            lyrHUD = new FlxLayer;
+            _xpDisplay = new FlxText(FlxG.width - 50, 2, 48, FlxG.score.toString());
+	    	_xpDisplay.setFormat(null, 16, 0xffffffff, "right");
+            _xpDisplay.scrollFactor = new Point(0, 0);
+            lyrHUD.add(_xpDisplay);
+
 			
 			for (var i:uint = 0; i < 8; i++)
 			{
 				playerBullets.push(add(new Bullet()));
 			}
 			player = new Player(playerBullets);
-		
+            _levelDisplay = new FlxText(50, 2, 200, "Level: " + player.level.toString());
+	    	_levelDisplay.setFormat(null, 16, 0xffffffff, "right");
+            _levelDisplay.scrollFactor = new Point(0, 0);
+            lyrHUD.add(_levelDisplay);					
 
 			add(new Enemy(player.x + 10, player.y + 10));
 			//IF IN DOUBT PUT THE FOLLOWING INSIDE YOUR DERIVED FlxState CLASS' CONSTRUCTOR (i.e. inside function MyState()...)
@@ -61,6 +77,7 @@ package com.smashingwindmills.states
 			add(player);
 			
 			FlxG.play(MusicMode);
+			this.add(lyrHUD);
 		}
 
 		//PUT THE FOLLOWING INSIDE YOUR DERIVED FlxState CLASS (i.e. under 'class MyState { ...')
@@ -78,10 +95,14 @@ package com.smashingwindmills.states
 		
 		override public function update():void
 		{
+            
+               _xpDisplay.text = FlxG.score.toString();
+            _levelDisplay.text =  "Level: " + player.level.toString()
 			_map.layerFg.collide(player);
 			_map.layerFg.collideArray(enemies);
-			_map.layerFg.collideArray(enemies);			
 			_map.layerFg.collideArray(playerBullets);
+			var foo:FlxTilemap = new FlxTilemap();
+			
 			FlxG.overlapArray(enemies, player, overlapPlayerEnemy);
 			FlxG.overlapArrays(playerBullets,enemies,bulletHitEnemy);
 
@@ -95,7 +116,7 @@ package com.smashingwindmills.states
 		private function bulletHitEnemy(bullet:FlxSprite,enemy:FlxSprite):void
 		{
 			bullet.hurt(0);
-			enemy.hurt(1);
+			enemy.hurt(player.BULLET_DAMAGE);
 		}		
 	}
 	
