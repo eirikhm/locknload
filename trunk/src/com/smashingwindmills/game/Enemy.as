@@ -11,7 +11,7 @@ package com.smashingwindmills.game
 		
 		[Embed(source="../media/temp/enemygibs.png")]
 		protected var EnemyGibsImage:Class;
-  			protected var gibs:FlxEmitter;
+  		protected var gibs:FlxEmitter;
   
   		protected static const GRAVITY_ACCELERATION:int = 420;
 
@@ -33,13 +33,6 @@ package com.smashingwindmills.game
 			health = ENEMY_HEALTH;
 			this.velocity.x = ENEMY_SPEED;
 			addAnimation("move",[0]);
-  		/*
-  		
-  		 this.gibs = FlxG.state.add(new FlxEmitter(0,0,0,0,null,-1.5,-150,150,-200,
-      0,-720,720,400,0,EnemyGibsImage,20,true)) as FlxEmitter;
-
-
-*/
   			var emitter:FlxEmitter = new FlxEmitter();
   			emitter.createSprites(EnemyGibsImage);
   			emitter.x = 0;
@@ -78,7 +71,7 @@ package com.smashingwindmills.game
 		
 		override public function kill():void
 		{
-			
+			FlxG.score += 25;
 		   this.gibs.x = this.x + (this.width>>1);
 		   this.gibs.y = this.y + (this.height>>1);
 		   this.gibs.restart();
