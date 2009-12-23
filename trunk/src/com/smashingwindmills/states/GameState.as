@@ -209,7 +209,7 @@ package com.smashingwindmills.states
 		
 		private function overlapPlayerLadder(ladder:FlxSprite,p:FlxSprite):void
 		{
-			
+			player.onLadder = true;
 		}
 		
 		private function bulletHitEnemy(bullet:FlxSprite,enemy:FlxSprite):void

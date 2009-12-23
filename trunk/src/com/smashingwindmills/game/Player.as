@@ -36,6 +36,9 @@ package com.smashingwindmills.game
 		// reference to current weapon
 		protected var _currentWeapon:BaseWeapon;
 		
+		protected var _onLadder:Boolean = false;
+		
+		
 		public function Player()
 		{
 			super(0,0);
@@ -124,33 +127,7 @@ package com.smashingwindmills.game
 						
 			if (FlxG.keys.justPressed("C"))
 			{
-				/*
-				var bXVel:int = 0;
-				var bYVel:int = 0;
-				var bX:int = x;
-				var bY:int = y;
-
-				if (facing == RIGHT)
-				{
-					bX += width -4;
-					bXVel = currentWeapon.baseVelocity.x;
-					bYVel = currentWeapon.baseVelocity.y;
-					
-				}
-				else
-				{
-					bX -= bullets[currentBullet].width -4;
-					bXVel = -currentWeapon.baseVelocity.x;
-					bYVel = currentWeapon.baseVelocity.y;
-				}
-				*/
 				currentWeapon.shoot(this);
-				
-				/*currentWeapon.bullets[currentBullet].shoot(bX,bY,bXVel,bYVel);
-				++currentBullet;
-				currentBullet %= bullets.length;
-				*/
-				
 				is_double_jump = false;
 			}				
 				
@@ -166,34 +143,60 @@ package com.smashingwindmills.game
 				acceleration.x = drag.x;				
 			}
 			
-			if (FlxG.keys.justPressed("X") && !velocity.y)
+			if (onLadder)
 			{
-				velocity.y = -JUMP_ACCELERATION;
-			}
-			else if (FlxG.keys.justPressed("X") && velocity.y)
-			{
-				if (!is_double_jump)
-				{
-					velocity.y = -JUMP_ACCELERATION;
-					is_double_jump = true;	
-				}
-			}
-			
-			if (velocity.y != 0)
-			{
-				play("jump");
-			}
-			else if (velocity.x == 0) // will reset if player hits cealing now..
-			{
-				is_double_jump = false;
+				acceleration.y = 0;
 				play("idle");
+				
+				if (FlxG.keys.UP)
+				{
+					velocity.y -= 40;
+					
+				}
+				else if (FlxG.keys.DOWN)
+				{
+					velocity.y = 40;
+				}
+				else
+				{
+					velocity.y = 0;
+				}
 			}
 			else
 			{
-				is_double_jump = false;
-				play("run");
+				acceleration.y = GRAVITY_ACCELERATION;
+
+				if (FlxG.keys.justPressed("X") && !velocity.y)
+				{
+					velocity.y = -JUMP_ACCELERATION;
+				}
+				else if (FlxG.keys.justPressed("X") && velocity.y)
+				{
+					if (!is_double_jump)
+					{
+						velocity.y = -JUMP_ACCELERATION;
+						is_double_jump = true;	
+					}
+				}
+				
+				if (velocity.y != 0)
+				{
+					play("jump");
+				}
+				else if (velocity.x == 0) // will reset if player hits cealing now..
+				{
+					is_double_jump = false;
+					play("idle");
+				}
+				else
+				{
+					is_double_jump = false;
+					play("run");
+				}
+				
 			}
 			
+			onLadder = false;
 			super.update();
 		}
 		
@@ -240,6 +243,16 @@ package com.smashingwindmills.game
 		public function set xpToNextLevel(value:int):void
 		{
 			_xpToNextLevel = value;
+		}
+		
+		public function get onLadder():Boolean
+		{
+			return _onLadder;
+		}
+		
+		public function set onLadder(value:Boolean):void
+		{
+			_onLadder = value;
 		}
 	}
 }
