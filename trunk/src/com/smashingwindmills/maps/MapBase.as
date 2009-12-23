@@ -3,16 +3,13 @@
 package com.smashingwindmills.maps {
 	import org.flixel.FlxTilemap;
 	
+	
 	public class MapBase {
 		//Layer name definitions
-		public static const LAYER_NEW_LAYER:uint = 0;
-		public static const LAYER_FG:uint = 1;
-		public static const LAYER_BG:uint = 2;
+		public static const LAYER_MAIN:uint = 0;
 
 		//Layer variable accessors
-		public var layerNewLayer:FlxTilemap;
-		public var layerFg:FlxTilemap;
-		public var layerBg:FlxTilemap;
+		public var layerMain:FlxTilemap;
 
 		//Map layers and principal layer (map) declarations
 		public var allLayers:Array;
@@ -28,9 +25,7 @@ package com.smashingwindmills.maps {
 
 		public var bgColor:uint = 0xff000000;
 
-		virtual public function addSpritesToLayerNewLayer(onAddCallback:Function = null):void { }
-		virtual public function addSpritesToLayerFg(onAddCallback:Function = null):void { }
-		virtual public function addSpritesToLayerBg(onAddCallback:Function = null):void { }
+		virtual public function addSpritesToLayerMain(onAddCallback:Function = null):void { }
 
 		public var customValues:Object = new Object;		//Name-value map;
 		virtual public function customFunction(param:* = null):* { }
