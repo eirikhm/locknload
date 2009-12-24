@@ -17,6 +17,8 @@ package com.smashingwindmills.game.weapon
 		
 		override public function update():void
 		{
+			
+			// check range property here
 			if (dead && finished)
 				exists = false;
 			else

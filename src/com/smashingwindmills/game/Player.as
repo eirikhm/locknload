@@ -19,10 +19,9 @@ package com.smashingwindmills.game
 		protected static const PLAYER_START_X:int = 300;
 		protected static const PLAYER_START_Y:int = 300;
 		
-		protected static const PLAYER_RUN_SPEED:int = 80;
+		protected static const PLAYER_RUN_SPEED:int = 100;
 		protected static const GRAVITY_ACCELERATION:int = 420;
 		protected static const JUMP_ACCELERATION:int = 200;
-
 
 		// current player level
 		protected var _level:int = 1;
@@ -116,9 +115,10 @@ package com.smashingwindmills.game
 			return newLevel;
 		}
 		
-		
 		override public function update():void
 		{
+			
+			
 				
 			if (FlxG.score >= xpToNextLevel)
 			{
@@ -128,9 +128,9 @@ package com.smashingwindmills.game
 			if (FlxG.keys.justPressed("C"))
 			{
 				currentWeapon.shoot(this);
-				is_double_jump = false;
 			}				
-				
+			
+			
 			acceleration.x = 0;
 			if (FlxG.keys.LEFT)
 			{
@@ -197,6 +197,10 @@ package com.smashingwindmills.game
 			}
 			
 			onLadder = false;
+			
+			if (y >= 640)
+				kill();
+				
 			super.update();
 		}
 		

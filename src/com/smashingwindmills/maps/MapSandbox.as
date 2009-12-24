@@ -96,18 +96,34 @@ package com.smashingwindmills.maps {
 			FlxG.state.add(obj);
 			if(onAddCallback != null)
 				onAddCallback(obj);
+				
+				
+				
+				
+				
+				
+			obj = new Turret(300, 536);;
+			obj.x+=obj.offset.x;
+			obj.y+=obj.offset.y;
+			FlxG.state.add(obj);
+			if(onAddCallback != null)
+				onAddCallback(obj);
+				
 			obj = new Tank(551, 536);;
 			obj.x+=obj.offset.x;
 			obj.y+=obj.offset.y;
 			FlxG.state.add(obj);
 			if(onAddCallback != null)
 				onAddCallback(obj);
+				
 			obj = new Tank(636, 534);;
 			obj.x+=obj.offset.x;
 			obj.y+=obj.offset.y;
 			FlxG.state.add(obj);
 			if(onAddCallback != null)
 				onAddCallback(obj);
+				
+				
 			obj = new Tank(817, 534);;
 			obj.x+=obj.offset.x;
 			obj.y+=obj.offset.y;
