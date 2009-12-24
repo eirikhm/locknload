@@ -2,9 +2,9 @@ package com.smashingwindmills.game.weapon
 {
 	public class CorrodeSquirt extends BaseWeapon
 	{
-		public function CorrodeSquirt()
+		public function CorrodeSquirt(numOfBullets:int = 8)
 		{
-			super();
+			super(numOfBullets);
 			
 	
 			baseDamage = 2;

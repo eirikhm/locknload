@@ -2,13 +2,12 @@ package com.smashingwindmills.states
 {
 	import com.smashingwindmills.game.Ladder;
 	import com.smashingwindmills.game.Player;
+	import com.smashingwindmills.game.enemy.BaseEnemy;
 	import com.smashingwindmills.game.enemy.Tank;
 	import com.smashingwindmills.game.enemy.Turret;
 	import com.smashingwindmills.game.weapon.BaseWeapon;
 	import com.smashingwindmills.game.weapon.CorrodeSquirt;
-	import com.smashingwindmills.game.weapon.CorrodeSquirtBullet;
 	import com.smashingwindmills.game.weapon.FireGattler;
-	import com.smashingwindmills.game.weapon.FireGattlerBullet;
 	import com.smashingwindmills.maps.MapBase;
 	import com.smashingwindmills.maps.MapSandbox;
 	
@@ -30,11 +29,10 @@ package com.smashingwindmills.states
 		protected var player:Player = null;
 		
 		protected var enemies:Array = new Array();
+		protected var enemyBullets:Array = new Array();
 		protected var ladders:Array = new Array();
 		private var _map:MapBase;
 
-		[Embed(source="../media/music/ugress.mp3")] 
-		protected var MusicMode:Class;
 
 		private var textExperience:FlxText;
 		private var textLevel:FlxText;
@@ -68,10 +66,6 @@ package com.smashingwindmills.states
 		{
 			initializeHud();
 			
-			/*for (var i:uint = 0; i < 8; i++)
-			{
-				playerBullets.push(add(new Bullet()));
-			}*/
 			player = new Player();
 			player.currentWeapon = buildCorrodeWeapon();
 			player.health = 100;
@@ -98,49 +92,39 @@ package com.smashingwindmills.states
 			FlxG.followAdjust(0.5,0.0);
 			add(player);
 			
-			FlxG.play(MusicMode,1.0,false);
 			this.add(lyrHUD);
+			
 		}
 		
 		private function buildCorrodeWeapon():BaseWeapon
 		{
-			
-			var weapon:BaseWeapon = new CorrodeSquirt();
-			
-			var bullets:Array = new Array();
-			for (var i:uint = 0; i < 8; i++)
-			{
-				bullets.push(add(new CorrodeSquirtBullet()));
-			}
-			weapon.bullets = bullets;
+			var weapon:BaseWeapon = new CorrodeSquirt(7);
+			weapon.buildBullets(this);			
 			return weapon;
 		}
 		private function buildFireWeapon():BaseWeapon
 		{
-			var weapon:BaseWeapon = new FireGattler();
-			
-			var bullets:Array = new Array();
-			for (var i:uint = 0; i < 8; i++)
-			{
-				bullets.push(add(new FireGattlerBullet()));
-			}
-			weapon.bullets = bullets;
+			var weapon:BaseWeapon = new FireGattler(3);
+			weapon.buildBullets(this);
 			return weapon;
 		}
 
-		//PUT THE FOLLOWING INSIDE YOUR DERIVED FlxState CLASS (i.e. under 'class MyState { ...')
-
 		protected function onAddSpriteCallback(obj:FlxSprite):void
 		{
-			if (obj is Turret)
-				enemies.push(obj);
-			
-			if(obj is Tank)
-				enemies.push(obj);
-				
-			if(obj is Tank)
-				enemies.push(obj);
-				
+			// pass in a reference to the player
+			if (obj is Turret || obj is Tank)
+			{
+				var temp:BaseEnemy = obj as BaseEnemy;
+				temp.player = player;
+				temp.state = this;
+				temp.initialize();
+				if (temp.weapon)
+				{
+					enemyBullets = enemyBullets.concat(temp.weapon.bullets);
+				}
+				enemies.push(temp);
+			}
+
 			if (obj is Ladder)
 				ladders.push(obj);
 		}
@@ -152,7 +136,6 @@ package com.smashingwindmills.states
 		
 		override public function update():void
 		{
-			
 			if (FlxG.keys.Y)
 			{
 				player.currentWeapon = buildCorrodeWeapon();	
@@ -193,13 +176,25 @@ package com.smashingwindmills.states
 			            
 			_map.layerMain.collide(player);
 			_map.layerMain.collideArray(enemies);
+			_map.layerMain.collideArray(enemyBullets);
 			_map.layerMain.collideArray(player.currentWeapon.bullets);
 			var foo:FlxTilemap = new FlxTilemap();
 			
 			FlxG.overlapArray(enemies, player, overlapPlayerEnemy);
+			FlxG.overlapArray(enemyBullets, player, bulletHitPlayer);
+			
 			FlxG.overlapArray(ladders, player, overlapPlayerLadder);
+			
 			FlxG.overlapArrays(player.currentWeapon.bullets,enemies,bulletHitEnemy);
 			super.update();
+		}
+		
+		private function bulletHitPlayer(bullet:FlxSprite,p:FlxSprite):void
+		{
+			trace("BOOOOM");
+			p.hurt(1);
+			bullet.hurt(0);
+
 		}
 		
 		private function overlapPlayerEnemy(enemy:FlxSprite,p:FlxSprite):void
@@ -218,5 +213,4 @@ package com.smashingwindmills.states
 			enemy.hurt(player.calculateWeaponDamage());
 		}		
 	}
-	
 }

@@ -21,7 +21,7 @@ package com.smashingwindmills.game.weapon
 		override public function update():void
 		{
 			// example on how to create somewhat unstable bullets
-			if (velocity.y >= 10)
+		/*	if (velocity.y >= 10)
 			{
 				isUp = false;		
 			}
@@ -36,7 +36,7 @@ package com.smashingwindmills.game.weapon
 			else
 			{
 				velocity.y -=3;
-			}
+			}*/
 			super.update();
 		}
 	}
