@@ -4,6 +4,7 @@ package com.smashingwindmills.game.weapon
 	{
 		public function FireGattler(numBullets:int = 8)
 		{
+			bulletType = FireGattlerBullet;
 			super(numBullets);
 			baseDamage = 20;
 			baseVelocity.x = 200;

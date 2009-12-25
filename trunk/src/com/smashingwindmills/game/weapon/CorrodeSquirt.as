@@ -4,6 +4,7 @@ package com.smashingwindmills.game.weapon
 	{
 		public function CorrodeSquirt(numOfBullets:int = 8)
 		{
+			bulletType = CorrodeSquirtBullet;
 			super(numOfBullets);
 			
 	

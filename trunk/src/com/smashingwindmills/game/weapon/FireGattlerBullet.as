@@ -1,5 +1,7 @@
 package com.smashingwindmills.game.weapon
 {
+	import flash.geom.Point;
+	
 	public class FireGattlerBullet extends BaseBullet
 	{
 		[Embed(source="../media/temp/enemy_bullet.png")]
@@ -9,7 +11,9 @@ package com.smashingwindmills.game.weapon
 		
 		public function FireGattlerBullet()
 		{
+			
 			super();
+			range = new Point(20,20);
 			loadGraphic(imgBullet,true);
 			addAnimation("up",[0]);
 			addAnimation("down",[1]);

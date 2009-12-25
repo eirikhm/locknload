@@ -1,24 +1,37 @@
 package com.smashingwindmills.game.weapon
 {
+	import flash.geom.Point;
+	
 	import org.flixel.FlxCore;
 	import org.flixel.FlxSprite;
 	
 	public class BaseBullet extends FlxSprite
 	{
+		protected var _startPosition:Point;
+		protected var _range:Point;
 		
 		public function BaseBullet()
 		{
 			super(0,0);
-			
 			exists = false;
-			
-
+			startPosition = new Point(0,0);
 		}
 		
 		override public function update():void
 		{
-			
-			// check range property here
+			// if range, check for range
+			if (range)
+			{
+				var deltaX:int = startPosition.x - x;
+				var deltaY:int = startPosition.y -y;
+				
+				if (deltaX > range.x || deltaX < -range.x || deltaX > range.y || deltaY < -range.y)
+				{
+					dead = true;
+					finished = true;
+				}
+			}
+
 			if (dead && finished)
 				exists = false;
 			else
@@ -43,9 +56,14 @@ package com.smashingwindmills.game.weapon
 			play("poof");
 		}
 		
-		public function shoot(X:int, Y:int, VelocityX:int, VelocityY:int):void
+		public function shoot(X:int, Y:int, VelocityX:int, VelocityY:int,r:Point = null):void
 		{
 			super.reset(X,Y);
+			if (range)
+				range = r
+				
+			startPosition.x = X;
+			startPosition.y = Y;
 			velocity.x = VelocityX;
 			velocity.y = VelocityY;
 			
@@ -57,6 +75,26 @@ package com.smashingwindmills.game.weapon
 			{
 				play("right");
 			}
+		}
+		
+		public function get startPosition():Point
+		{
+			return _startPosition;
+		}
+		
+		public function set startPosition(value:Point):void
+		{
+			_startPosition = value;
+		}
+		
+		public function get range():Point
+		{
+			return _range;
+		}
+		
+		public function set range(value:Point):void
+		{
+			_range = value;
 		}
 	}
 }

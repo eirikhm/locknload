@@ -17,6 +17,7 @@ package com.smashingwindmills.game.enemy
 		protected var maxHorizontalMovement:int;
 		private var speedX:int = 50;
 
+		protected var count:int =0;
 		public function Tank(X:int, Y:int,maxMove:int = 80)
 		{			
 			// always call super ctor before setting xp value etc						
@@ -45,6 +46,17 @@ package com.smashingwindmills.game.enemy
 				this.x  = this.startingX;
 				this.velocity.x = speedX;
 			}	
+			
+			if (count > 0)
+				count -= FlxG.elapsed;
+				
+			if (count <= 0 && velocity.y == 0)
+			{
+				this.velocity.y = -100;
+				count = 30;
+			}
+			
+			
 			super.update();
 		}
 		
