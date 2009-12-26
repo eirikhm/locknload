@@ -63,10 +63,8 @@ package com.smashingwindmills.game.enemy
 				{
 					_attackCounter -= FlxG.elapsed;
 				}
-				if (_attackCounter <= 0)// && player.y > y -1 && player.y < y +1)
+				if (_attackCounter <= 0)
 				{
-					// TODO: add support for Yrange
-					
 					var rangeX:int = player.x - x;
 					var rangeY:int = player.y - y;
 			
@@ -75,7 +73,6 @@ package com.smashingwindmills.game.enemy
 						_attackCounter = 20;
 						_weapon.shoot(this);						
 					}
-
 				}
 			}
 			// fire off shots here.

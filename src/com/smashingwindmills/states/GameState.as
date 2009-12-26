@@ -69,7 +69,8 @@ package com.smashingwindmills.states
 			player = new Player();
 			player.currentWeapon = buildCorrodeWeapon();
 			player.health = 100;
-			player.x = 300;
+			player.x = 100;
+			player.y = 500;
 			textHealth.text = "HP: " + player.health;
 			textLevel.text = "Level: " + player.level;
 			textExperience.text = "XP: " + FlxG.score.toString() + "/" + player.xpToNextLevel;			
@@ -191,10 +192,8 @@ package com.smashingwindmills.states
 		
 		private function bulletHitPlayer(bullet:FlxSprite,p:FlxSprite):void
 		{
-			trace("BOOOOM");
 			p.hurt(1);
 			bullet.hurt(0);
-
 		}
 		
 		private function overlapPlayerEnemy(enemy:FlxSprite,p:FlxSprite):void
@@ -209,7 +208,9 @@ package com.smashingwindmills.states
 		
 		private function bulletHitEnemy(bullet:FlxSprite,enemy:FlxSprite):void
 		{
+			// bullet should be castable here, or find it via weapon.bullets and extract damage)
 			bullet.hurt(0);
+			trace("Doing damange : " + player.calculateWeaponDamage());
 			enemy.hurt(player.calculateWeaponDamage());
 		}		
 	}

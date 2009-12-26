@@ -14,17 +14,51 @@ package com.smashingwindmills.game.weapon
 		 */
 		protected var _baseDamage:int;
 		
+		/**
+		 * Base velocity for bullets
+		 */
 		protected var _baseVelocity:Point = new Point(100,0);
 		
+		/**
+		 * Array of bullets
+		 */
 		protected var _bullets:Array = new Array();
 		
+		/**
+		 * Keep track of current bullet
+		 */
 		protected var _currentBullet:uint = 0;
 		
+		/**
+		 * Number of bullets to create
+		 */
 		protected var _bulletCount:int;
 		
+		/**
+		 * Fire Range
+		 * TODO: Create rectangle here
+		 */
 		protected var _range:Point = new Point(150,150);
 
+		/**
+		 * Type of bullets to use for this weapon
+		 */
 		protected var _bulletType:Class;
+		
+		/**
+		 *  min number of seconds a weapon can charge
+		 */
+		protected var _minChargeTime:Number = 0;
+		
+		/**
+		 * max number of seconds a weapon can charge
+		 */
+		protected var _maxChargeTime:Number = 0;
+		
+		/**
+		 * keeps track of how long the weapon has charged (if weapon suppors charge)
+		 */
+		protected var _chargeTime:Number = 0;
 		
 		public function BaseWeapon(numOfBullets:int = 8)
 		{
@@ -32,23 +66,36 @@ package com.smashingwindmills.game.weapon
 			bullets = new Array();
 		}
 		
+		/**
+		 * Build array of bullets and add them to the state
+		 */
 		public function buildBullets(state:FlxState):void
 		{
 			for (var i:int = 0; i < bulletCount; i++)
 			{
 				var bullet:BaseBullet = new bulletType();
-				
 				bullets.push(state.add(bullet));
 			}
 		}
 		
+		/**
+		 *  override to give visual feedback on charge
+		 */
+		public function charge(value:Number):void
+		{
+			chargeTime += value;
+			trace("charginf: " + chargeTime);
+		}
+		
+		/**
+		 * Fire the weapon
+		 */
 		public function shoot(equipper:FlxSprite):void
 		{
 			var bXVel:int = 0;
 			var bYVel:int = 0;
 			var bX:int = equipper.x;
 			var bY:int = equipper.y;
-
 			
 			if (equipper.facing == RIGHT)
 			{
@@ -65,7 +112,30 @@ package com.smashingwindmills.game.weapon
 				
 			bullets[_currentBullet].shoot(bX,bY,bXVel,bYVel,range);
 			++_currentBullet;
-			_currentBullet %= bullets.length;	
+			_currentBullet %= bullets.length;
+			
+			
+		trace("bullet fired with charge :" + chargeTime);
+		
+			// this will be reset when bullet hits target, so might need to store damage in bullet?
+			//
+			chargeTime = 0;
+				
+		}
+		
+		/**
+		 * Determine if this weapon can be charged
+		 */
+		public function canCharge():Boolean
+		{
+			if (minChargeTime > 0)
+				return true;
+			return false;
+		}
+		
+		public function calculateDamange():Number
+		{
+			return baseDamage;
 		}
 		
 		public function get baseDamage():int
@@ -126,6 +196,35 @@ package com.smashingwindmills.game.weapon
 		public function set bulletType(value:Class):void
 		{
 			_bulletType = value;
+		}
+		
+		public function get minChargeTime():Number
+		{
+			return _minChargeTime;
+		}
+		
+		public function set minChargeTime(value:Number):void
+		{
+			_minChargeTime = value;
+		}
+		
+		public function get maxChargeTime():Number
+		{
+			return _maxChargeTime;
+		}
+		
+		public function set maxChargeTime(value:Number):void
+		{
+			_maxChargeTime = value;
+		}
+	
+		public function get chargeTime():Number
+		{
+			return _chargeTime;
+		}
+		public function set chargeTime(value:Number):void
+		{
+			_chargeTime = value;
 		}
 	}
 }

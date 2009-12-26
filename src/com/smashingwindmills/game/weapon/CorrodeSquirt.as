@@ -10,7 +10,16 @@ package com.smashingwindmills.game.weapon
 	
 			baseDamage = 2;
 			baseVelocity.x = 1000;
-			baseVelocity.y = 0; 
+			baseVelocity.y = 0;
+			maxChargeTime = 6; 
+			minChargeTime = 1;
+		}
+		
+		public override function calculateDamange():Number
+		{
+			trace("damange for " + baseDamage);
+			trace("Charged for " + chargeTime);
+			return baseDamage * chargeTime;
 		}
 
 	}
