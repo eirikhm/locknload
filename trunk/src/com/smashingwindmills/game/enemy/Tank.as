@@ -47,15 +47,15 @@ package com.smashingwindmills.game.enemy
 				this.velocity.x = speedX;
 			}	
 			
+			// add some experimental funky jumpy
 			if (count > 0)
 				count -= FlxG.elapsed;
-				
+					
 			if (count <= 0 && velocity.y == 0)
 			{
-				this.velocity.y = -100;
+				this.velocity.y = -200;
 				count = 30;
 			}
-			
 			
 			super.update();
 		}

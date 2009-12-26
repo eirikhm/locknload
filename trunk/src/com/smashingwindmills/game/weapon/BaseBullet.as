@@ -7,7 +7,14 @@ package com.smashingwindmills.game.weapon
 	
 	public class BaseBullet extends FlxSprite
 	{
+		/**
+		 * Start position of the bullet
+		 */
 		protected var _startPosition:Point;
+		
+		/**
+		 * Range the bullet can travel
+		 */
 		protected var _range:Point;
 		
 		public function BaseBullet()
@@ -56,7 +63,7 @@ package com.smashingwindmills.game.weapon
 			play("poof");
 		}
 		
-		public function shoot(X:int, Y:int, VelocityX:int, VelocityY:int,r:Point = null):void
+		public function shoot(X:int, Y:int, VelocityX:int, VelocityY:int,r:Point = null,charge:Number = 0):void
 		{
 			super.reset(X,Y);
 			if (range)
@@ -66,6 +73,7 @@ package com.smashingwindmills.game.weapon
 			startPosition.y = Y;
 			velocity.x = VelocityX;
 			velocity.y = VelocityY;
+			
 			
 			if (velocity.y < 0)
 			{

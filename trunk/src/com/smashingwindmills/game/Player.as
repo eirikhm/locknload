@@ -12,7 +12,6 @@ package com.smashingwindmills.game
 		[Embed(source="../media/player/player.png")]
 		protected var playerSprite:Class;
 		
-		
   		protected var gibs:FlxEmitter;
 
 		// can be moved into level 
@@ -35,8 +34,11 @@ package com.smashingwindmills.game
 		// reference to current weapon
 		protected var _currentWeapon:BaseWeapon;
 		
+		// flags if the player is on a ladder
 		protected var _onLadder:Boolean = false;
 		
+		// flags if the player is in water
+		protected var _inWater:Boolean = false;
 		
 		public function Player()
 		{
@@ -117,19 +119,30 @@ package com.smashingwindmills.game
 		
 		override public function update():void
 		{
-			
-			
-				
 			if (FlxG.score >= xpToNextLevel)
 			{
 				level = calculateLevelUp();
 			}
-						
-			if (FlxG.keys.justPressed("C"))
+
+			// if current weapon can charge, init charge timer			
+			if (FlxG.keys.C && currentWeapon.canCharge())
+			{
+				var chargeValue:Number = 0;
+				if (FlxG.keys.justPressed("C"))
+				{
+					chargeValue = 0;
+				}
+				else
+				{
+					chargeValue = FlxG.elapsed;
+				}	
+				currentWeapon.charge(chargeValue);			
+			}
+			
+			if (FlxG.keys.justReleased("C"))
 			{
 				currentWeapon.shoot(this);
-			}				
-			
+			}
 			
 			acceleration.x = 0;
 			if (FlxG.keys.LEFT)
@@ -162,6 +175,11 @@ package com.smashingwindmills.game
 					velocity.y = 0;
 				}
 			}
+			else if (inWater)
+			{
+				acceleration.y = 0;
+				// add some drag here.
+			}
 			else
 			{
 				acceleration.y = GRAVITY_ACCELERATION;
@@ -193,7 +211,6 @@ package com.smashingwindmills.game
 					is_double_jump = false;
 					play("run");
 				}
-				
 			}
 			
 			onLadder = false;
@@ -204,12 +221,17 @@ package com.smashingwindmills.game
 			super.update();
 		}
 		
-		
-		public function calculateWeaponDamage():int
+		/**
+		 * Get weapon damage calculated (charge bonus etc)
+		 */
+		public function calculateWeaponDamage():Number
 		{
-			return currentWeapon.baseDamage;
+			return currentWeapon.calculateDamange();
 		}
 		
+		/**
+		 * kills the player and plays a quake effect
+		 */
 		override public function kill():void
 		{
 			FlxG.quake(0.05,2);
@@ -257,6 +279,16 @@ package com.smashingwindmills.game
 		public function set onLadder(value:Boolean):void
 		{
 			_onLadder = value;
+		}
+		
+		public function get inWater():Boolean
+		{
+			return _inWater;
+		}
+		
+		public function set inWater(value:Boolean):void
+		{
+			_inWater = value;
 		}
 	}
 }
