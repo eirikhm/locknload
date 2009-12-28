@@ -5,80 +5,69 @@ package com.smashingwindmills.states
 	import com.smashingwindmills.game.enemy.BaseEnemy;
 	import com.smashingwindmills.game.enemy.Tank;
 	import com.smashingwindmills.game.enemy.Turret;
+	import com.smashingwindmills.game.items.BaseItem;
+	import com.smashingwindmills.game.weapon.BaseBullet;
 	import com.smashingwindmills.game.weapon.BaseWeapon;
 	import com.smashingwindmills.game.weapon.CorrodeSquirt;
 	import com.smashingwindmills.game.weapon.FireGattler;
 	import com.smashingwindmills.maps.MapBase;
 	import com.smashingwindmills.maps.MapSandbox;
-	
-	import flash.geom.Point;
+	import com.smashingwindmills.states.layers.HUDLayer;
+	import com.smashingwindmills.states.layers.LevelUpLayer;
 	
 	import org.flixel.FlxG;
 	import org.flixel.FlxLayer;
 	import org.flixel.FlxSprite;
 	import org.flixel.FlxState;
-	import org.flixel.FlxText;
 	import org.flixel.FlxTilemap;
 	
 	public class GameState extends FlxState
 	{
-		[Embed (source = "../media/tiles/default.png")]
-		protected var defaultTile:Class;
-		
 		protected var levelBlocks:Array = new Array();
-		protected var player:Player = null;
+		protected var _player:Player = null;
 		
 		protected var enemies:Array = new Array();
 		protected var enemyBullets:Array = new Array();
 		protected var ladders:Array = new Array();
 		private var _map:MapBase;
-
-
-		private var textExperience:FlxText;
-		private var textLevel:FlxText;
-		private var textHealth:FlxText;
+		protected var _lootItems:Array = new Array();
 		
-		private var lastHealth:int = 0;
-		private var lastXp:int = 0;
-		private var lastLevel:int = 0;
-        public static var lyrHUD:FlxLayer;
+
+		
+        public static var lyrHUD:HUDLayer;
+        public static var lyrLevelUp:FlxLayer;
         
+        private function initializeLevelUpLayer():void
+        {
+        	lyrLevelUp = new LevelUpLayer();
+        	lyrLevelUp.visible = false;
+        		
+        }
         private function initializeHud():void
         {
-        	lyrHUD = new FlxLayer;
-        	
-	       	textHealth = new FlxText(-100, 2, 200, "HP: ");
-	    	textHealth.setFormat(null, 16, 0x0FFF15, "right");
-            textHealth.scrollFactor = new Point(0, 0);
-            lyrHUD.add(textHealth);
-			
-            textExperience = new FlxText(FlxG.width - 250, 2, 200, "XP: " + FlxG.score.toString());
-	    	textExperience.setFormat(null, 16, 0xFFFF00, "right");
-            textExperience.scrollFactor = new Point(0, 0);
-            lyrHUD.add(textExperience);
-                                	
-            textLevel = new FlxText(250, 2, 100, "Level: ");
-	    	textLevel.setFormat(null, 16, 0xffffffff, "right");
-            textLevel.scrollFactor = new Point(0, 0);
-            lyrHUD.add(textLevel);		
+        	lyrHUD = new HUDLayer();
         }
+        
 		public function GameState()
 		{
-			initializeHud();
+
+			
 			
 			player = new Player();
-			player.currentWeapon = buildCorrodeWeapon();
+			var weapon:BaseWeapon = buildWeapon(CorrodeSquirt,7,-1);
+			
+			player.weapons.push(weapon);
+			player.weapons.push(buildWeapon(FireGattler,4,10));
+			player.currentWeaponIndex = 0;
 			player.health = 100;
 			player.x = 100;
 			player.y = 500;
-			textHealth.text = "HP: " + player.health;
-			textLevel.text = "Level: " + player.level;
-			textExperience.text = "XP: " + FlxG.score.toString() + "/" + player.xpToNextLevel;			
-
-			lastHealth = player.health;
-			lastLevel = player.level;
-			lastXp = FlxG.score;
-
+			
+			// hud expects player to exist in state.
+			initializeHud();
+			initializeLevelUpLayer();			
+			
+			
 			//Create the map
 			_map = new MapSandbox();
 
@@ -94,19 +83,16 @@ package com.smashingwindmills.states
 			add(player);
 			
 			this.add(lyrHUD);
-			
+			this.add(lyrLevelUp);
 		}
 		
-		private function buildCorrodeWeapon():BaseWeapon
+		
+		private function buildWeapon(weaponClass:Class,bulletCount:int = 5, ammo:int = -1):BaseWeapon
 		{
-			var weapon:BaseWeapon = new CorrodeSquirt(7);
-			weapon.buildBullets(this);			
-			return weapon;
-		}
-		private function buildFireWeapon():BaseWeapon
-		{
-			var weapon:BaseWeapon = new FireGattler(3);
-			weapon.buildBullets(this);
+			var weapon:BaseWeapon = new weaponClass(6);
+			weapon.buildBullets();
+			weapon.ammo = ammo;
+			weapon.bulletCount = bulletCount;
 			return weapon;
 		}
 
@@ -117,7 +103,6 @@ package com.smashingwindmills.states
 			{
 				var temp:BaseEnemy = obj as BaseEnemy;
 				temp.player = player;
-				temp.state = this;
 				temp.initialize();
 				if (temp.weapon)
 				{
@@ -137,62 +122,57 @@ package com.smashingwindmills.states
 		
 		override public function update():void
 		{
-			if (FlxG.keys.Y)
+			if (FlxG.keys.justPressed("L"))
 			{
-				player.currentWeapon = buildCorrodeWeapon();	
-			}
-			
-			if (FlxG.keys.I)
-			{
-				player.currentWeapon = buildFireWeapon();	
-			}
-			if (player.health != lastHealth)
-			{
-				if (player.health > 75)
+				lyrLevelUp.visible = !lyrLevelUp.visible;
+				if (lyrLevelUp.visible)
 				{
-					textHealth.color = 0x0FFF15;
-				}
-				else if (player.health > 40)
-				{
-					textHealth.color = 0xFFC90E;
+					FlxG.showCursor();
 				}
 				else
 				{
-					textHealth.color = 0xFF0000;
+					FlxG.hideCursor();
 				}
-				textHealth.text = "HP:" + player.health.toString();
-				lastHealth = player.health;
-			}	
-				
-			if (player.level != lastLevel)
-			{
-				textLevel.text =  "Level: " + player.level.toString()	
-				lastLevel = player.level;
 			}
-			if (FlxG.score != lastXp)
+			
+			if (FlxG.keys.ONE)
 			{
-				lastXp = FlxG.score;
-				textExperience.text = "XP: " + FlxG.score.toString() + "/" + player.xpToNextLevel;
+				player.currentWeaponIndex = 0;	
 			}
-			            
+			
+			if (FlxG.keys.TWO)
+			{
+				player.currentWeaponIndex = 1;	
+			}
+     
 			_map.layerMain.collide(player);
 			_map.layerMain.collideArray(enemies);
+			_map.layerMain.collideArray(lootItems);
 			_map.layerMain.collideArray(enemyBullets);
 			_map.layerMain.collideArray(player.currentWeapon.bullets);
+			
 			var foo:FlxTilemap = new FlxTilemap();
 			
 			FlxG.overlapArray(enemies, player, overlapPlayerEnemy);
 			FlxG.overlapArray(enemyBullets, player, bulletHitPlayer);
-			
+			FlxG.overlapArray(lootItems, player, playerPickupLoot);
 			FlxG.overlapArray(ladders, player, overlapPlayerLadder);
-			
+						
 			FlxG.overlapArrays(player.currentWeapon.bullets,enemies,bulletHitEnemy);
 			super.update();
 		}
 		
+		private function playerPickupLoot(loot:FlxSprite,p:FlxSprite):void
+		{
+			var item:BaseItem = loot as BaseItem;
+			item.aquireLoot(player);
+			loot.kill();
+		}
+		
 		private function bulletHitPlayer(bullet:FlxSprite,p:FlxSprite):void
 		{
-			p.hurt(1);
+			var temp:BaseBullet= bullet as BaseBullet;
+			p.hurt(temp.damage);
 			bullet.hurt(0);
 		}
 		
@@ -206,12 +186,32 @@ package com.smashingwindmills.states
 			player.onLadder = true;
 		}
 		
+		
 		private function bulletHitEnemy(bullet:FlxSprite,enemy:FlxSprite):void
 		{
-			// bullet should be castable here, or find it via weapon.bullets and extract damage)
 			bullet.hurt(0);
-			trace("Doing damange : " + player.calculateWeaponDamage());
-			enemy.hurt(player.calculateWeaponDamage());
+			var temp:BaseBullet= bullet as BaseBullet;
+			enemy.hurt(temp.damage);
 		}		
+		
+		public function get lootItems():Array
+		{
+			return _lootItems;	
+		}
+	    
+		public function set lootItems(value:Array):void
+		{
+			_lootItems = value;
+		}
+		
+		public function get player():Player
+		{
+			return _player;
+		}
+		
+		public function set player(value:Player):void
+		{
+			_player = value;
+		}
 	}
 }

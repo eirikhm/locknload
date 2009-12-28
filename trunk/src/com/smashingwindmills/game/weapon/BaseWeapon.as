@@ -2,6 +2,7 @@ package com.smashingwindmills.game.weapon
 {
 	import flash.geom.Point;
 	
+	import org.flixel.FlxG;
 	import org.flixel.FlxSprite;
 	import org.flixel.FlxState;
 	
@@ -20,7 +21,7 @@ package com.smashingwindmills.game.weapon
 		protected var _baseVelocity:Point = new Point(100,0);
 		
 		/**
-		 * Array of bullets
+		 * Array of bullets which can exists at one given time.
 		 */
 		protected var _bullets:Array = new Array();
 		
@@ -60,17 +61,35 @@ package com.smashingwindmills.game.weapon
 		 */
 		protected var _chargeTime:Number = 0;
 		
-		public function BaseWeapon(numOfBullets:int = 8)
+		/**
+		 * ammo count for this weapon. if set to -1 the weapon has infinite ammo
+		 */
+		protected var _ammo:int = -1; 
+		
+		/**
+		 * Max ammo count for weapon. -1 means infinite
+		 */
+		protected var _maxAmmo:int = -1;
+		
+		/**
+		 * Weapon display name
+		 */
+		protected var _name:String;
+				
+		public function BaseWeapon(numOfBullets:int = 8,initialAmmo:int = -1,initialMaxAmmo:int = -1)
 		{
 			bulletCount = numOfBullets;
 			bullets = new Array();
+			ammo = initialAmmo;
+			maxAmmo = initialMaxAmmo;
 		}
 		
 		/**
 		 * Build array of bullets and add them to the state
 		 */
-		public function buildBullets(state:FlxState):void
+		public function buildBullets():void
 		{
+			var state:FlxState = FlxG.state;
 			for (var i:int = 0; i < bulletCount; i++)
 			{
 				var bullet:BaseBullet = new bulletType();
@@ -84,7 +103,6 @@ package com.smashingwindmills.game.weapon
 		public function charge(value:Number):void
 		{
 			chargeTime += value;
-			trace("charginf: " + chargeTime);
 		}
 		
 		/**
@@ -92,6 +110,17 @@ package com.smashingwindmills.game.weapon
 		 */
 		public function shoot(equipper:FlxSprite):void
 		{
+			if (ammo == 0)
+			{
+				trace("out of ammo");
+				// show out of ammo text?
+				return;
+			}
+			else if (ammo > 0)
+			{
+				--ammo;
+			}
+			
 			var bXVel:int = 0;
 			var bYVel:int = 0;
 			var bX:int = equipper.x;
@@ -109,18 +138,15 @@ package com.smashingwindmills.game.weapon
 				bXVel = -baseVelocity.x;
 				bYVel = baseVelocity.y;
 			}
-				
+			
+			// calculate damage for this bullet
+			bullets[_currentBullet].damage = calculateDamange();
 			bullets[_currentBullet].shoot(bX,bY,bXVel,bYVel,range);
 			++_currentBullet;
 			_currentBullet %= bullets.length;
 			
-			
-		trace("bullet fired with charge :" + chargeTime);
-		
 			// this will be reset when bullet hits target, so might need to store damage in bullet?
-			//
 			chargeTime = 0;
-				
 		}
 		
 		/**
@@ -225,6 +251,36 @@ package com.smashingwindmills.game.weapon
 		public function set chargeTime(value:Number):void
 		{
 			_chargeTime = value;
+		}
+		
+		public function get ammo():int
+		{
+			return _ammo;
+		}
+		
+		public function set ammo(value:int):void
+		{
+			_ammo = value;
+		}
+		
+		public function get name():String
+		{
+			return _name;
+		}
+		
+		public function set name(value:String):void
+		{
+			_name = value;
+		}
+		
+		public function get maxAmmo():int
+		{
+			return _maxAmmo;
+		}
+		
+		public function set maxAmmo(value:int):void
+		{
+			_maxAmmo = value;
 		}
 	}
 }

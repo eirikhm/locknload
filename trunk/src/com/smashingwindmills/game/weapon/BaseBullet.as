@@ -17,6 +17,11 @@ package com.smashingwindmills.game.weapon
 		 */
 		protected var _range:Point;
 		
+		/**
+		 * Damage value this bullet instance will do
+		 */
+		protected var _damage:int;
+		
 		public function BaseBullet()
 		{
 			super(0,0);
@@ -103,6 +108,16 @@ package com.smashingwindmills.game.weapon
 		public function set range(value:Point):void
 		{
 			_range = value;
+		}
+		
+		public function get damage():int
+		{
+			return _damage;
+		}
+		
+		public function set damage(value:int):void
+		{
+			_damage = value;
 		}
 	}
 }

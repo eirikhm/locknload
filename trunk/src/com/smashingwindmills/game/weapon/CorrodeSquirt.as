@@ -7,7 +7,7 @@ package com.smashingwindmills.game.weapon
 			bulletType = CorrodeSquirtBullet;
 			super(numOfBullets);
 			
-	
+			name = "Corrode Squirt Gun";
 			baseDamage = 2;
 			baseVelocity.x = 1000;
 			baseVelocity.y = 0;
@@ -17,8 +17,6 @@ package com.smashingwindmills.game.weapon
 		
 		public override function calculateDamange():Number
 		{
-			trace("damange for " + baseDamage);
-			trace("Charged for " + chargeTime);
 			return baseDamage * chargeTime;
 		}
 
