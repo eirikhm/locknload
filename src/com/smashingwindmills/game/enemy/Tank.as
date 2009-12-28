@@ -1,6 +1,8 @@
 package com.smashingwindmills.game.enemy
 {
 	import com.smashingwindmills.game.effects.BaseBloodGibs;
+	import com.smashingwindmills.game.items.HealthKit;
+	import com.smashingwindmills.states.GameState;
 	
 	import org.flixel.FlxEmitter;
 	import org.flixel.FlxG;
@@ -66,6 +68,16 @@ package com.smashingwindmills.game.enemy
 			this.gibs.y = this.y + (this.height>>1);
 			this.gibs.restart();
 			super.kill();
+			
+			var drop:HealthKit = new HealthKit();
+			drop.x = x;
+			drop.y = y;
+			
+			
+			var gameState:GameState = FlxG.state as GameState;
+			gameState.lootItems.push(drop);
+			gameState.add(drop);
+			
 		}
 	}
 }

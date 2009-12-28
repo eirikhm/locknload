@@ -2,8 +2,9 @@ package com.smashingwindmills.game.enemy
 {
 	import com.smashingwindmills.game.Player;
 	import com.smashingwindmills.game.effects.SmokeGibs;
-	import com.smashingwindmills.game.weapon.BaseWeapon;
+	import com.smashingwindmills.game.items.AmmoItem;
 	import com.smashingwindmills.game.weapon.FireGattler;
+	import com.smashingwindmills.states.GameState;
 	
 	import org.flixel.FlxEmitter;
 	import org.flixel.FlxG;
@@ -21,7 +22,7 @@ package com.smashingwindmills.game.enemy
 		public function Turret(X:int,Y:int,p:Player = null,s:FlxState=null)
 		{
 			// always call super ctor before setting xp value etc						
-			super(X,Y,p,s);
+			super(X,Y,p);
 			xpValue = 300;
 			health = 50;
 			
@@ -43,7 +44,7 @@ package com.smashingwindmills.game.enemy
 		
 		override public function initialize():void
 		{
-			_weapon.buildBullets(state);			
+			_weapon.buildBullets();			
 		}
 		
 		override public function update():void
@@ -85,6 +86,17 @@ package com.smashingwindmills.game.enemy
 			this._gibs.y = this.y + (this.height>>1);
 			this._gibs.restart();
 			super.kill();
+			
+			var drop:AmmoItem = new AmmoItem();
+			drop.weaponType = FireGattler;
+			drop.ammoCount = 2;
+			drop.x = x;
+			drop.y = y;
+			
+			var gameState:GameState = FlxG.state as GameState;
+			gameState.lootItems.push(drop);
+			gameState.add(drop);
 		}
+		
 	}
 }

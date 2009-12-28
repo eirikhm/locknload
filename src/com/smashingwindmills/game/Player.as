@@ -1,6 +1,7 @@
 package com.smashingwindmills.game
 {
 	import com.smashingwindmills.game.effects.BaseBloodGibs;
+	import com.smashingwindmills.game.items.BaseItem;
 	import com.smashingwindmills.game.weapon.BaseWeapon;
 	
 	import org.flixel.FlxEmitter;
@@ -14,31 +15,44 @@ package com.smashingwindmills.game
 		
   		protected var gibs:FlxEmitter;
 
-		// can be moved into level 
-		protected static const PLAYER_START_X:int = 300;
-		protected static const PLAYER_START_Y:int = 300;
-		
 		protected static const PLAYER_RUN_SPEED:int = 100;
 		protected static const GRAVITY_ACCELERATION:int = 420;
 		protected static const JUMP_ACCELERATION:int = 200;
 
-		// current player level
+		/**
+		 *  current player level
+		 */
 		protected var _level:int = 1;
 			
-		// number of XP point sto next level
+		/**
+		 * number of XP points next level
+		 */
 		protected var _xpToNextLevel:int = 100;
 		
-		// flag for double jump
+		/**
+		 *  flag for double jump
+		 */
 		protected var is_double_jump:Boolean = false;
 		
-		// reference to current weapon
-		protected var _currentWeapon:BaseWeapon;
+		/** 
+		 * reference to current weapon
+		 */
+		protected var _currentWeaponIndex:int;
 		
-		// flags if the player is on a ladder
+		/**
+		 * flags if the player is on a ladder
+		 */
 		protected var _onLadder:Boolean = false;
 		
-		// flags if the player is in water
+		/**
+		 *  flags if the player is in water
+		 */
 		protected var _inWater:Boolean = false;
+		
+		/**
+		 * Array of available weapons
+		 */
+		protected var _weapons:Array = new Array();
 		
 		public function Player()
 		{
@@ -164,7 +178,6 @@ package com.smashingwindmills.game
 				if (FlxG.keys.UP)
 				{
 					velocity.y -= 40;
-					
 				}
 				else if (FlxG.keys.DOWN)
 				{
@@ -241,14 +254,23 @@ package com.smashingwindmills.game
 			super.kill();
 		}
 		
-		public function get currentWeapon():BaseWeapon
+		public function aquireLoot(item:BaseItem):void
 		{
-			return _currentWeapon;
+			
 		}
 		
-		public function set currentWeapon(value:BaseWeapon):void
+		public function get currentWeapon():BaseWeapon
 		{
-			_currentWeapon = value;
+			return weapons[_currentWeaponIndex];
+		}
+		
+		public function get currentWeaponIndex():int
+		{
+			return _currentWeaponIndex;	
+		}
+		public function set currentWeaponIndex(index:int):void
+		{
+			_currentWeaponIndex = index;
 		}
 		
 		public function get level():int
@@ -289,6 +311,16 @@ package com.smashingwindmills.game
 		public function set inWater(value:Boolean):void
 		{
 			_inWater = value;
+		}
+		
+		public function get weapons():Array
+		{
+			return _weapons;
+		}
+		
+		public function set weapons(value:Array):void
+		{
+			_weapons = value;
 		}
 	}
 }

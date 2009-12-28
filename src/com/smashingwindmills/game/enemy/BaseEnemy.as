@@ -18,19 +18,17 @@ package com.smashingwindmills.game.enemy
 		protected var _level:int = 1;
 		protected var _xpValue:int = 10;
 		protected var _player:Player;
-		protected var _state:FlxState;
 		protected var _weapon:BaseWeapon = null;
 		protected var _detectRange:Point = new Point(150,50);
 
 
-		public function BaseEnemy(X:int, Y:int, p:Player = null,s:FlxState = null)
+		public function BaseEnemy(X:int, Y:int, p:Player = null)
 		{
 			super(0,0);
 			y = Y;
 			x = X;
 			acceleration.y = GRAVITY_ACCELERATION;
 			player = p;
-			state = s;
 		}
 		
 		public function initialize():void
@@ -38,15 +36,6 @@ package com.smashingwindmills.game.enemy
 			
 		}
 		
-		public function get state():FlxState
-		{
-			return _state;
-		}
-		
-		public function set state(value:FlxState):void
-		{
-			_state = value;
-		}
 		
 		
 		// child will do all movement. this just adjusts facing

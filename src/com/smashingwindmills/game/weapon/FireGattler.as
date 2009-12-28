@@ -6,10 +6,10 @@ package com.smashingwindmills.game.weapon
 		{
 			bulletType = FireGattlerBullet;
 			super(numBullets);
+			name = "Fire Gattler Gun";
 			baseDamage = 20;
 			baseVelocity.x = 200;
 			baseVelocity.y = 0; 
 		}
-
 	}
 }
