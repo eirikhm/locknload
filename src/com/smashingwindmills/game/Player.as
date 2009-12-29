@@ -13,6 +13,9 @@ package com.smashingwindmills.game
 		[Embed(source="../media/player/player.png")]
 		protected var playerSprite:Class;
 		
+		/**
+		 * Gibs emitted when player dies
+		 */
   		protected var gibs:FlxEmitter;
 
 		protected static const PLAYER_RUN_SPEED:int = 100;
@@ -20,7 +23,7 @@ package com.smashingwindmills.game
 		protected static const JUMP_ACCELERATION:int = 200;
 
 		/**
-		 *  current player level
+		 * current player level
 		 */
 		protected var _level:int = 1;
 			
@@ -214,7 +217,7 @@ package com.smashingwindmills.game
 				{
 					play("jump");
 				}
-				else if (velocity.x == 0) // will reset if player hits cealing now..
+				else if (velocity.x == 0) // will reset if player hits ceeling now..
 				{
 					is_double_jump = false;
 					play("idle");
@@ -227,9 +230,11 @@ package com.smashingwindmills.game
 			}
 			
 			onLadder = false;
-			
-			if (y >= 640)
-				kill();
+		
+		// TODO: implement dying if the player is below the level itself.
+		
+		//	if (y >= 640)
+		//		kill();
 				
 			super.update();
 		}
@@ -256,7 +261,7 @@ package com.smashingwindmills.game
 		
 		public function aquireLoot(item:BaseItem):void
 		{
-			
+			// not used, see same method in BaseItem
 		}
 		
 		public function get currentWeapon():BaseWeapon
