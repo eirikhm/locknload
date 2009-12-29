@@ -8,7 +8,7 @@ package com.smashingwindmills.game.weapon
 			super(numOfBullets);
 			
 			name = "Corrode Squirt Gun";
-			baseDamage = 2;
+			baseDamage = 10;
 			baseVelocity.x = 1000;
 			baseVelocity.y = 0;
 			maxChargeTime = 6; 

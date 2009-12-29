@@ -10,8 +10,9 @@ package com.smashingwindmills.states
 	import com.smashingwindmills.game.weapon.BaseWeapon;
 	import com.smashingwindmills.game.weapon.CorrodeSquirt;
 	import com.smashingwindmills.game.weapon.FireGattler;
+	import com.smashingwindmills.maps.BaseMap;
 	import com.smashingwindmills.maps.MapBase;
-	import com.smashingwindmills.maps.MapSandbox;
+	import com.smashingwindmills.maps.Prototype;
 	import com.smashingwindmills.states.layers.HUDLayer;
 	import com.smashingwindmills.states.layers.LevelUpLayer;
 	
@@ -19,7 +20,6 @@ package com.smashingwindmills.states
 	import org.flixel.FlxLayer;
 	import org.flixel.FlxSprite;
 	import org.flixel.FlxState;
-	import org.flixel.FlxTilemap;
 	
 	public class GameState extends FlxState
 	{
@@ -32,17 +32,37 @@ package com.smashingwindmills.states
 		private var _map:MapBase;
 		protected var _lootItems:Array = new Array();
 		
-
-		
         public static var lyrHUD:HUDLayer;
         public static var lyrLevelUp:FlxLayer;
         
+		[Embed(source="../media/maps2/mytest.CSV", mimeType="application/octet-stream")]
+		private var mapData:Class;
+		[Embed(source="../media/maps2/Woodland_Tileset.png")]
+		private var tiles:Class;
+
+	// uncomment to embed music.
+	//	[Embed(source="../media/temp/music.mp3")]
+	//	private var bgMusic:Class;
+	
+	
+		private var _level:BaseMap;
+		
+		public function get level():BaseMap
+		{
+			return _level;
+		}
+		
+		public function set level(value:BaseMap):void
+		{
+			_level = value;
+		}
+		
         private function initializeLevelUpLayer():void
         {
         	lyrLevelUp = new LevelUpLayer();
         	lyrLevelUp.visible = false;
-        		
         }
+        
         private function initializeHud():void
         {
         	lyrHUD = new HUDLayer();
@@ -50,9 +70,6 @@ package com.smashingwindmills.states
         
 		public function GameState()
 		{
-
-			
-			
 			player = new Player();
 			var weapon:BaseWeapon = buildWeapon(CorrodeSquirt,7,-1);
 			
@@ -68,19 +85,27 @@ package com.smashingwindmills.states
 			initializeLevelUpLayer();			
 			
 			
+			level = new Prototype();
+			level.initialize();
+			
+			
+			
 			//Create the map
-			_map = new MapSandbox();
+		//	_map = new MapSandbox();
 
 			//Add the layers to current the FlxState
 
-			FlxG.state.add(_map.layerMain);
-			_map.addSpritesToLayerMain(onAddSpriteCallback);
+			//FlxG.state.add(_map.layerMain);
+		//	_map.addSpritesToLayerMain(onAddSpriteCallback);
 			
-			FlxG.followBounds(_map.boundsMinX, _map.boundsMinY, _map.boundsMaxX, _map.boundsMaxY);
+			FlxG.followBounds(level.boundsMinX, level.boundsMinY, level.boundsMaxX, level.boundsMaxY);
 			
 			FlxG.follow(player,2.5);
 			FlxG.followAdjust(0.5,0.0);
 			add(player);
+			
+			// uncomment to play music
+		//	FlxG.playMusic(bgMusic,1);
 			
 			this.add(lyrHUD);
 			this.add(lyrLevelUp);
@@ -145,13 +170,12 @@ package com.smashingwindmills.states
 				player.currentWeaponIndex = 1;	
 			}
      
-			_map.layerMain.collide(player);
-			_map.layerMain.collideArray(enemies);
-			_map.layerMain.collideArray(lootItems);
-			_map.layerMain.collideArray(enemyBullets);
-			_map.layerMain.collideArray(player.currentWeapon.bullets);
+			level.mainLayer.collide(player);
+			level.mainLayer.collideArray(enemies);
+			level.mainLayer.collideArray(lootItems);
+			level.mainLayer.collideArray(enemyBullets);
+			level.mainLayer.collideArray(player.currentWeapon.bullets);
 			
-			var foo:FlxTilemap = new FlxTilemap();
 			
 			FlxG.overlapArray(enemies, player, overlapPlayerEnemy);
 			FlxG.overlapArray(enemyBullets, player, bulletHitPlayer);
@@ -185,7 +209,6 @@ package com.smashingwindmills.states
 		{
 			player.onLadder = true;
 		}
-		
 		
 		private function bulletHitEnemy(bullet:FlxSprite,enemy:FlxSprite):void
 		{

@@ -36,9 +36,9 @@ package com.smashingwindmills.game.enemy
 			
 		}
 		
-		
-		
-		// child will do all movement. this just adjusts facing
+		/**
+		 *  child will do all movement. this just adjusts facing
+		 */
 		override public function update():void
 		{
 			if (this.velocity.x > 0)
@@ -58,6 +58,12 @@ package com.smashingwindmills.game.enemy
 		{
 			FlxG.score += xpValue;
 			super.kill();
+		}
+		
+		override public function hurt(Damage:Number):void
+		{
+			super.hurt(Damage);
+			this.flicker(0.1);
 		}
 		
 		public function get level():int
