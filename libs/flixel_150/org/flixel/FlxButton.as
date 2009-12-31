@@ -206,7 +206,20 @@ package org.flixel
 		protected function onMouseUp(event:MouseEvent):void
 		{
 			if(!exists || !visible || !active || !FlxG.mouse.justReleased() || (_callback == null)) return;
-			if(_off.overlapsPoint(FlxG.mouse.x+(1-scrollFactor.x)*FlxG.scroll.x,FlxG.mouse.y+(1-scrollFactor.y)*FlxG.scroll.y)) _callback();
+//			if(_off.overlapsPoint(FlxG.mouse.x+(1-scrollFactor.x)*FlxG.scroll.x,FlxG.mouse.y+(1-scrollFactor.y)*FlxG.scroll.y)) _callback();
+/**
+ * scroll 0/-336.1199413922641
+screen 0/0
+layer  0/0
+button 20/20
+mouse  54/364
+ */
+ 			var mouseX:Number = FlxG.mouse.x - FlxG.scroll.x;
+ 			var mouseY:Number = FlxG.mouse.y - FlxG.scroll.y;
+			if(_off.overlapsPoint(mouseX+(1-scrollFactor.x)*FlxG.scroll.x,mouseY+(1-scrollFactor.y)*FlxG.scroll.y))
+			{
+				_callback();
+			} 
 		}
 	}
 }

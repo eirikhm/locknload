@@ -18,9 +18,9 @@ package com.smashingwindmills.game
 		 */
   		protected var gibs:FlxEmitter;
 
-		protected static const PLAYER_RUN_SPEED:int = 100;
-		protected static const GRAVITY_ACCELERATION:int = 420;
-		protected static const JUMP_ACCELERATION:int = 200;
+		protected var PLAYER_RUN_SPEED:int;
+		protected var GRAVITY_ACCELERATION:int;
+		protected var JUMP_ACCELERATION:int;
 
 		/**
 		 * current player level
@@ -57,12 +57,25 @@ package com.smashingwindmills.game
 		 */
 		protected var _weapons:Array = new Array();
 		
+		/**
+		 * Number of available skillpoints
+		 */
+		protected var _availableSkillPoints:int = 0;
+		
+		
+		// some temp skill counters
+		private var skillJump:int = 0;
+		private var skillShoot:int = 0;
+		private var skillIdle:Number = 0;
 		public function Player()
 		{
 			super(0,0);
 		
 			loadGraphic(playerSprite,true,true);
 			
+			PLAYER_RUN_SPEED = 80;
+			GRAVITY_ACCELERATION = 420;
+			JUMP_ACCELERATION = 200;
 			drag.x = PLAYER_RUN_SPEED * 8;
 			
 			acceleration.y = GRAVITY_ACCELERATION;
@@ -85,57 +98,40 @@ package com.smashingwindmills.game
 		{
 			var score:int = FlxG.score;
 			var newLevel:int = 0;
+				
+			// TODO :move this out to some kind of helper class
+			var levels:Array = new Array();
+			levels.push(0);
+			levels.push(300);
+			levels.push(750);
+			levels.push(1200);
+			levels.push(1900);
+			levels.push(4000);
+			levels.push(5200);
+			levels.push(700);
 			
-			if (score >= 7000)
+			// start checking on current level, as we never go downwards
+			for (var i:int = level; i < levels.length; i++)
 			{
-				newLevel = 10;
-				xpToNextLevel = 9999;
+				// TODO: make sure we dont get above max levels
+				if (score >= levels[i] && score < levels[i+1])
+				{
+					newLevel = i+1;
+					xpToNextLevel = levels[i+1];
+					break;
+				}
 			}
-			else if (score >= 5200)
-			{
-				newLevel = 9;
-				xpToNextLevel = 7000;
-			}
-			else if (score >= 4000)
-			{
-				newLevel = 8;	
-				xpToNextLevel = 5200;
-			}
-			else if (score >= 2900)
-			{
-				newLevel = 7; 	
-				xpToNextLevel = 4000;
-			}
-			else if (score >= 1900)
-			{
-				newLevel = 6;
-				xpToNextLevel = 2900;	
-			}
-			else if (score >= 1200)
-			{
-				newLevel = 5;
-				xpToNextLevel = 1900;
-			}  
-			else if (score >= 750)
-			{
-				newLevel = 4; 
-				xpToNextLevel = 1200;
-			}
-			else if (score >= 300)
-			{
-				newLevel = 3;
-				xpToNextLevel = 750;
-			}
-			else if (score >= 100)
-			{
-				newLevel = 2;
-				xpToNextLevel = 300;
-			}
+				
+			// make sure we get one skill point per level
+			availableSkillPoints += newLevel - level;
+						
 			return newLevel;
 		}
 		
 		override public function update():void
 		{
+						checkSkillLevelUp();
+						
 			if (FlxG.score >= xpToNextLevel)
 			{
 				level = calculateLevelUp();
@@ -158,6 +154,7 @@ package com.smashingwindmills.game
 			
 			if (FlxG.keys.justReleased("C"))
 			{
+				skillShoot++;
 				currentWeapon.shoot(this);
 			}
 			
@@ -202,6 +199,7 @@ package com.smashingwindmills.game
 
 				if (FlxG.keys.justPressed("X") && !velocity.y)
 				{
+					skillJump++;
 					velocity.y = -JUMP_ACCELERATION;
 				}
 				else if (FlxG.keys.justPressed("X") && velocity.y)
@@ -220,6 +218,7 @@ package com.smashingwindmills.game
 				else if (velocity.x == 0) // will reset if player hits ceeling now..
 				{
 					is_double_jump = false;
+					skillIdle += FlxG.elapsed;
 					play("idle");
 				}
 				else
@@ -230,13 +229,37 @@ package com.smashingwindmills.game
 			}
 			
 			onLadder = false;
-		
+
 		// TODO: implement dying if the player is below the level itself.
 		
 		//	if (y >= 640)
 		//		kill();
 				
 			super.update();
+
+		}
+		
+		private function checkSkillLevelUp():void
+		{
+			// TODO: separate into some sort of usabe addons / decorators that can upgrade the needed parts
+			// look at normal levelups. this will always reset ammo for the selected weapon.
+			if (skillJump > 10)
+			{
+				JUMP_ACCELERATION = 250;
+				maxVelocity.y = JUMP_ACCELERATION;
+			}
+			if (skillIdle > 10)
+			{
+				maxVelocity.x = PLAYER_RUN_SPEED;
+				PLAYER_RUN_SPEED = 150;
+			}
+			if (skillShoot > 10)
+			{
+				// problem if setting maxammo to higher than ammo?
+				currentWeapon.maxAmmo = 100;
+				//currentWeapon.ammo = 100;
+				
+			}
 		}
 		
 		/**
@@ -257,6 +280,15 @@ package com.smashingwindmills.game
 			this.gibs.y = this.y + (this.height>>1);
 			this.gibs.restart();
 			super.kill();
+		}
+		
+		
+		override public function hurt(Damage:Number):void
+		{
+			super.hurt(Damage);
+			
+			// TODO: make fade work.
+			//FlxG.fade(0xFFFF00FF,1);
 		}
 		
 		public function aquireLoot(item:BaseItem):void
@@ -326,6 +358,16 @@ package com.smashingwindmills.game
 		public function set weapons(value:Array):void
 		{
 			_weapons = value;
+		}
+		
+		public function get availableSkillPoints():int
+		{
+			return _availableSkillPoints;
+		}
+		
+		public function set availableSkillPoints(value:int):void
+		{
+			_availableSkillPoints = value;
 		}
 	}
 }
