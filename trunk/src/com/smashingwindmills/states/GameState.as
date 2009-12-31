@@ -78,7 +78,7 @@ package com.smashingwindmills.states
 			player.currentWeaponIndex = 0;
 			player.health = 100;
 			player.x = 100;
-			player.y = 500;
+			player.y = 1044;
 			
 			// hud expects player to exist in state.
 			initializeHud();
@@ -88,7 +88,7 @@ package com.smashingwindmills.states
 			level = new Prototype();
 			level.initialize();
 			
-			
+			tempAddEnemies();
 			
 			//Create the map
 		//	_map = new MapSandbox();
@@ -111,6 +111,19 @@ package com.smashingwindmills.states
 			this.add(lyrLevelUp);
 		}
 		
+		private function tempAddEnemies():void
+		{
+			var turret:Turret = new Turret(200,1044);
+			turret.player = player;
+			turret.initialize();
+			if (turret.weapon)
+			{
+				enemyBullets = enemyBullets.concat(turret.weapon.bullets);
+			}
+			enemies.push(turret);
+			FlxG.state.add(turret);
+			
+		}
 		
 		private function buildWeapon(weaponClass:Class,bulletCount:int = 5, ammo:int = -1):BaseWeapon
 		{
@@ -195,9 +208,10 @@ package com.smashingwindmills.states
 		
 		private function bulletHitPlayer(bullet:FlxSprite,p:FlxSprite):void
 		{
-			var temp:BaseBullet= bullet as BaseBullet;
+			var temp:BaseBullet = bullet as BaseBullet;
 			p.hurt(temp.damage);
 			bullet.hurt(0);
+			
 		}
 		
 		private function overlapPlayerEnemy(enemy:FlxSprite,p:FlxSprite):void
