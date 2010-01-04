@@ -12,6 +12,10 @@ package com.smashingwindmills.game.enemy
 		[Embed(source="../media/temp/enemy_preview.png")]
 		protected var enemyImage:Class;
 		
+		[Embed(source="../media/temp/audio/asplode.mp3")] 
+		protected var SndDie:Class;
+		
+		
   		protected var gibs:FlxEmitter;
 
 
@@ -68,7 +72,10 @@ package com.smashingwindmills.game.enemy
 			this.gibs.y = this.y + (this.height>>1);
 			this.gibs.restart();
 			super.kill();
-			
+
+			FlxG.play(SndDie);
+
+
 			var drop:HealthKit = new HealthKit();
 			drop.x = x;
 			drop.y = y;

@@ -2,8 +2,12 @@ package com.smashingwindmills.game
 {
 	import com.smashingwindmills.game.effects.BaseBloodGibs;
 	import com.smashingwindmills.game.items.BaseItem;
+	import com.smashingwindmills.game.skills.Skill;
+	import com.smashingwindmills.game.skills.SkillDecorator;
 	import com.smashingwindmills.game.weapon.BaseWeapon;
+	import com.smashingwindmills.states.GameState;
 	
+	import org.flixel.FlxCore;
 	import org.flixel.FlxEmitter;
 	import org.flixel.FlxG;
 	import org.flixel.FlxSprite;
@@ -13,14 +17,24 @@ package com.smashingwindmills.game
 		[Embed(source="../media/player/player.png")]
 		protected var playerSprite:Class;
 		
+		[Embed(source="../media/temp/audio/jump.mp3")] 
+		protected var SndJump:Class;
+		
+		[Embed(source="../media/temp/audio/land.mp3")] 
+		protected var SndLand:Class;
+		
+		
+		[Embed(source="../media/temp/audio/pickup.mp3")] 
+		protected var SndSkillUp:Class;
+		
+		
+		
 		/**
 		 * Gibs emitted when player dies
 		 */
   		protected var gibs:FlxEmitter;
 
-		protected var PLAYER_RUN_SPEED:int;
 		protected var GRAVITY_ACCELERATION:int;
-		protected var JUMP_ACCELERATION:int;
 
 		/**
 		 * current player level
@@ -62,26 +76,65 @@ package com.smashingwindmills.game
 		 */
 		protected var _availableSkillPoints:int = 0;
 		
+		protected var _skills:Array;
+		
+		protected var _usageSkills:Array;
 		
 		// some temp skill counters
-		private var skillJump:int = 0;
-		private var skillShoot:int = 0;
-		private var skillIdle:Number = 0;
+		public var skillJump:int = 0;
+		public var skillShoot:int = 0;
+		public var skillIdle:Number = 0;
+		public var skillRun:Number = 0;
+
+		public var skillJumpNext:int = 10;
+		public var skillShootNext:int = 10;
+		public var skillIdleNext:Number = 10;
+		public var skillRunNext:Number = 10;
+		
+		
+		
+		
+		// can be moved to a helper class, since these only hold initial values
+		public var baseMaxHealth:int = 100;
+		public var baseRunSpeed:int = 80;
+		public var baseJumpAcceleration:int = 200;
+		public var baseHealthRegenRate:int = 5;
+		public var baseAmmoRegenRate:int = 5;
+
+
+		public var currentMaxHealth:int;
+		public var currentRunSpeed:int;
+		public var currentJumpAcceleration:int;
+		public var currentHealthRegenRate:int;
+		public var currentAmmoRegenRate:int;
+		
+		
+		private var _ammoRegenCounter:Number = 0;
+		private var _healthRegenCounter:Number = 0;
+
+		
 		public function Player()
 		{
 			super(0,0);
 		
+			skills = PlayerHelper.buildSkills();
+			_usageSkills = PlayerHelper.buildUsageSkills();
+			currentJumpAcceleration = baseJumpAcceleration;
+			currentMaxHealth = baseMaxHealth;
+			currentHealthRegenRate = baseHealthRegenRate;
+			currentAmmoRegenRate = baseAmmoRegenRate;
+			currentRunSpeed = baseRunSpeed;
+			
+			
 			loadGraphic(playerSprite,true,true);
 			
-			PLAYER_RUN_SPEED = 80;
 			GRAVITY_ACCELERATION = 420;
-			JUMP_ACCELERATION = 200;
-			drag.x = PLAYER_RUN_SPEED * 8;
+			drag.x = currentRunSpeed * 8;
 			
 			acceleration.y = GRAVITY_ACCELERATION;
 			
-			maxVelocity.x = PLAYER_RUN_SPEED;
-			maxVelocity.y = JUMP_ACCELERATION;
+			maxVelocity.x = currentRunSpeed;
+			maxVelocity.y = currentJumpAcceleration;
 			
 			addAnimation("idle", [0]);
 			addAnimation("run", [1, 2, 3, 0], 12);
@@ -99,16 +152,7 @@ package com.smashingwindmills.game
 			var score:int = FlxG.score;
 			var newLevel:int = 0;
 				
-			// TODO :move this out to some kind of helper class
-			var levels:Array = new Array();
-			levels.push(0);
-			levels.push(300);
-			levels.push(750);
-			levels.push(1200);
-			levels.push(1900);
-			levels.push(4000);
-			levels.push(5200);
-			levels.push(700);
+			var levels:Array = PlayerHelper.LEVELS;
 			
 			// start checking on current level, as we never go downwards
 			for (var i:int = level; i < levels.length; i++)
@@ -118,6 +162,7 @@ package com.smashingwindmills.game
 				{
 					newLevel = i+1;
 					xpToNextLevel = levels[i+1];
+					FlxG.play(SndSkillUp);
 					break;
 				}
 			}
@@ -130,7 +175,15 @@ package com.smashingwindmills.game
 		
 		override public function update():void
 		{
-						checkSkillLevelUp();
+			checkSkillLevelUp();
+			
+			if (maxVelocity.y != currentJumpAcceleration)
+				maxVelocity.y = currentJumpAcceleration;
+
+			if (maxVelocity.x != currentRunSpeed)
+				maxVelocity.x = currentRunSpeed;
+
+
 						
 			if (FlxG.score >= xpToNextLevel)
 			{
@@ -170,6 +223,7 @@ package com.smashingwindmills.game
 				acceleration.x = drag.x;				
 			}
 			
+			
 			if (onLadder)
 			{
 				acceleration.y = 0;
@@ -200,14 +254,16 @@ package com.smashingwindmills.game
 				if (FlxG.keys.justPressed("X") && !velocity.y)
 				{
 					skillJump++;
-					velocity.y = -JUMP_ACCELERATION;
+					velocity.y = -currentJumpAcceleration;
+					FlxG.play(SndJump);
 				}
 				else if (FlxG.keys.justPressed("X") && velocity.y)
 				{
 					if (!is_double_jump)
 					{
-						velocity.y = -JUMP_ACCELERATION;
+						velocity.y = -currentJumpAcceleration;
 						is_double_jump = true;	
+						FlxG.play(SndJump);
 					}
 				}
 				
@@ -225,6 +281,7 @@ package com.smashingwindmills.game
 				{
 					is_double_jump = false;
 					play("run");
+					skillRun += FlxG.elapsed;
 				}
 			}
 			
@@ -235,30 +292,200 @@ package com.smashingwindmills.game
 		//	if (y >= 640)
 		//		kill();
 				
+				
+			
+			if (_healthRegenCounter >= currentHealthRegenRate)
+			{
+				health++;
+				// this logic should be handled by get/set pair
+				if (health > currentMaxHealth)
+					health = currentMaxHealth;
+				_healthRegenCounter = 0;
+			}
+			else
+			{
+				_healthRegenCounter += FlxG.elapsed;
+			}
+			
+			if (_ammoRegenCounter >= currentAmmoRegenRate)
+			{
+				currentWeapon.ammo++;
+				// this logic should be handled by get/set pair
+				if (currentWeapon.ammo > currentWeapon.currentMaxAmmo)
+					currentWeapon.ammo = currentWeapon.currentMaxAmmo;
+				_ammoRegenCounter = 0;
+			}
+			else
+			{
+				_ammoRegenCounter += FlxG.elapsed;
+			}
+			
 			super.update();
-
+		}
+		
+		override public function hitFloor(Contact:FlxCore=null):Boolean
+		{
+			if(velocity.y > 50)
+				FlxG.play(SndLand);
+			return super.hitFloor();
 		}
 		
 		private function checkSkillLevelUp():void
 		{
 			// TODO: separate into some sort of usabe addons / decorators that can upgrade the needed parts
 			// look at normal levelups. this will always reset ammo for the selected weapon.
-			if (skillJump > 10)
+			
+			var state:GameState = FlxG.state as GameState;
+			
+			for (var i:int = 0; i < _usageSkills.length; i++)
 			{
-				JUMP_ACCELERATION = 250;
-				maxVelocity.y = JUMP_ACCELERATION;
-			}
-			if (skillIdle > 10)
-			{
-				maxVelocity.x = PLAYER_RUN_SPEED;
-				PLAYER_RUN_SPEED = 150;
-			}
-			if (skillShoot > 10)
-			{
-				// problem if setting maxammo to higher than ammo?
-				currentWeapon.maxAmmo = 100;
-				//currentWeapon.ammo = 100;
+				// check for max level
+				var skill:Skill = _usageSkills[i] as Skill;
 				
+				var deco:SkillDecorator = skill.levels[skill.currentLevel];
+				
+				// if there is no deco, we probably have max level. just skip 
+				if (!deco)
+					continue;
+					
+				switch (skill.id)
+				{
+					case PlayerHelper.USAGE_SKILL_JUMP:
+					{
+						if (skillJump >= deco.requirementCounter)
+						{
+							FlxG.play(SndSkillUp);
+							skill.currentLevel++;
+							state.showFloatMessage("Jump is now level " + (skill.currentLevel+1), 0xFFFFFF);
+							calculateUsageSkills(); 
+							skillJump = 0;
+							
+							// find next level requirement
+							if (skill.levels[skill.currentLevel])
+							{
+								var nextDecoJump:SkillDecorator = skill.levels[skill.currentLevel];
+								skillJumpNext = nextDecoJump.requirementCounter;
+							}
+						}
+						
+						break;	
+					}
+					case PlayerHelper.USAGE_SKILL_RUN:
+					{
+						if (skillRun >= deco.requirementCounter)
+						{
+							FlxG.play(SndSkillUp);
+							skill.currentLevel++;
+							state.showFloatMessage("Run is now level " + (skill.currentLevel+1), 0xFFFFFF);
+							calculateUsageSkills(); 
+							skillRun = 0;
+							
+							if (skill.levels[skill.currentLevel])
+							{
+								var nextDecoRun:SkillDecorator = skill.levels[skill.currentLevel];
+								skillRunNext = nextDecoRun.requirementCounter;
+							}
+						}
+						break;
+					}
+					case PlayerHelper.USAGE_SKILL_IDLE:
+					{
+						if (skillIdle >= deco.requirementCounter)
+						{
+							FlxG.play(SndSkillUp);
+							skill.currentLevel++;
+							state.showFloatMessage("Regen is now level " + (skill.currentLevel+1), 0xFFFFFF);
+							calculateUsageSkills(); 
+							skillIdle = 0;
+							
+							if (skill.levels[skill.currentLevel])
+							{
+								var nextDecoReg:SkillDecorator = skill.levels[skill.currentLevel];
+								skillIdleNext = nextDecoReg.requirementCounter;
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		public function calculateUsageSkills():void
+		{
+			// could possibly be merged with calculateSkills
+			for (var i:int = 0; i < _usageSkills.length; i++)
+			{
+				var skill:Skill = _usageSkills[i] as Skill;
+				
+				if (skill.currentLevel != 0)
+				{
+					var deco:SkillDecorator = skill.levels[skill.currentLevel-1];
+					switch (skill.id)
+					{
+						case PlayerHelper.USAGE_SKILL_JUMP:
+						{
+							currentJumpAcceleration = baseJumpAcceleration * deco.playerJumpVelocity;
+							break;	
+						}
+						case PlayerHelper.USAGE_SKILL_RUN:
+						{
+							currentRunSpeed = baseRunSpeed * deco.playerRunSpeed;
+							break;	
+						}
+						case PlayerHelper.USAGE_SKILL_IDLE:
+						{
+							currentHealthRegenRate = baseHealthRegenRate * deco.playerRegenRate;
+							break;	
+						}
+					}
+				}
+			}
+		}
+		
+		public function calculateSkills():void
+		{
+			for (var i:int = 0; i < skills.length; i++)
+			{
+				var skill:Skill = skills[i] as Skill;
+				
+				if (skill.currentLevel != 0)
+				{
+					// do -1 as we have level zero based in the skills array
+					var deco:SkillDecorator = skill.levels[skill.currentLevel-1];
+					
+					switch (skill.id)
+					{
+						case PlayerHelper.SKILL_AMMO:
+						{
+							// take this into consideration later on
+							//if (deco.weponClass)
+							for each(var weaponA:BaseWeapon in weapons)
+							{
+								weaponA.currentMaxAmmo = weaponA.baseMaxAmmo + deco.weaponMaxAmmo;
+								// TODO: check if deco is set for a given weapon. this assumes its global
+								currentAmmoRegenRate = baseAmmoRegenRate + deco.weaponAmmoRegen;
+								// add regen as well 
+							}
+							break;
+						}
+						case PlayerHelper.SKILL_GUNS:
+						{
+							// take this into consideration later on
+							//if (deco.weponClass)
+							for each(var weaponG:BaseWeapon in weapons)
+							{
+								weaponG.currentDamage = weaponG.baseDamage * deco.weaponDamage;
+								// add projectile as well
+							}
+							break;
+						}
+						case PlayerHelper.SKILL_HEALTH:
+						{
+							currentMaxHealth = baseMaxHealth * deco.playerHealth;
+							currentHealthRegenRate = deco.playerRegenRate;
+							break;
+						}
+					}
+				}
 			}
 		}
 		
@@ -291,6 +518,7 @@ package com.smashingwindmills.game
 			//FlxG.fade(0xFFFF00FF,1);
 		}
 		
+		// TODO: remove me?
 		public function aquireLoot(item:BaseItem):void
 		{
 			// not used, see same method in BaseItem
@@ -368,6 +596,28 @@ package com.smashingwindmills.game
 		public function set availableSkillPoints(value:int):void
 		{
 			_availableSkillPoints = value;
+		}
+		
+		public function get skills():Array
+		{
+			return _skills;
+		}
+		
+		public function set skills(value:Array):void
+		{
+			_skills = value;
+		}
+		
+		public function getSkillById(skillId:String):Skill
+		{
+			for each(var skill:Skill in skills)
+			{
+				if (skill.id == skillId)
+				{
+					return skill;
+				}
+			}
+			return null;
 		}
 	}
 }

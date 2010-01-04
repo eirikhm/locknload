@@ -19,6 +19,10 @@ package com.smashingwindmills.game.enemy
 		
 		protected var _attackCounter:int = 0;
 
+		[Embed(source="../media/temp/audio/asplode.mp3")] 
+		protected var SndDie:Class;
+		
+		
 		public function Turret(X:int,Y:int,p:Player = null,s:FlxState=null)
 		{
 			// always call super ctor before setting xp value etc						
@@ -44,7 +48,7 @@ package com.smashingwindmills.game.enemy
 		
 		override public function initialize():void
 		{
-			_weapon.buildBullets();			
+			_weapon.initialize();			
 		}
 		
 		override public function update():void
@@ -87,6 +91,8 @@ package com.smashingwindmills.game.enemy
 			this._gibs.restart();
 			super.kill();
 			
+			FlxG.play(SndDie);
+						
 			var drop:AmmoItem = new AmmoItem();
 			drop.weaponType = FireGattler;
 			drop.ammoCount = 2;

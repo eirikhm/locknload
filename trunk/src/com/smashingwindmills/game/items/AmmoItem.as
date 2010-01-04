@@ -27,6 +27,10 @@ package com.smashingwindmills.game.items
 				if (p.weapons[i] is weaponType)
 				{
 					p.weapons[i].ammo += ammoCount;
+					if (p.weapons[i].ammo > p.weapons[i].currentMaxAmmo)
+					{
+						p.weapons[i].ammo = p.weapons[i].currentMaxAmmo;	
+					}
 					break;
 				}
 			}

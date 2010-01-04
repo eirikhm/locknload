@@ -1,8 +1,3 @@
-Level Up!
-
-Level up layer needs clickable zones for improving weapons / health etc. Maybe introduce stats points for player
-
-
 Restart Game
 
 Add suppport to restart current level
@@ -22,10 +17,14 @@ Make sure water movement / gravity / drag works out
 
 
 
-Add skills which improve upon usage
 
+BaseWeapon
+- extract range as base + current values
+- clean up in general
 
-- jumping
-- running
-- aiming
-- healing
+BaseBullet
+- Clean up
+
+Player
+- Move base values away?
+
