@@ -1,7 +1,13 @@
 package com.smashingwindmills.game.weapon
 {
+	import org.flixel.FlxG;
+	import org.flixel.FlxSprite;
+	
 	public class CorrodeSquirt extends BaseWeapon
 	{
+		[Embed(source="../media/temp/audio/shoot.mp3")] 
+		protected var SndShoot:Class;
+		
 		public function CorrodeSquirt(numOfBullets:int = 8)
 		{
 			bulletType = CorrodeSquirtBullet;
@@ -18,6 +24,12 @@ package com.smashingwindmills.game.weapon
 		public override function calculateDamange():Number
 		{
 			return baseDamage * chargeTime;
+		}
+		
+		override public function shoot(equipper:FlxSprite):void
+		{
+			super.shoot(equipper);
+			FlxG.play(SndShoot);
 		}
 
 	}

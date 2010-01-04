@@ -1,7 +1,6 @@
 package com.smashingwindmills.states.layers
 {
-	import com.smashingwindmills.game.weapon.BaseWeapon;
-	import com.smashingwindmills.game.weapon.CorrodeSquirt;
+	import com.smashingwindmills.game.PlayerHelper;
 	import com.smashingwindmills.states.GameState;
 	
 	import flash.geom.Point;
@@ -14,8 +13,18 @@ package com.smashingwindmills.states.layers
 	
 	public class LevelUpLayer extends FlxLayer
 	{
-		private var textMain:FlxText;
-		private var textSkillPoints:FlxText;
+		protected var textMain:FlxText;
+		protected var textSkillPoints:FlxText;
+		protected var fire:FlxButton;
+		
+		protected var gunsText:FlxText;
+		protected var ammoText:FlxText;
+		protected var healthText:FlxText;
+		
+		protected var gunsButton:FlxButton; 
+		protected var ammoButton:FlxButton;
+		protected var healthButton:FlxButton; 
+
 
 		[Embed (source = "../media/temp/level_up.png")]
 		protected var backgroundImage:Class;
@@ -23,17 +32,15 @@ package com.smashingwindmills.states.layers
 		[Embed (source = "../media/temp/level_up_pane.png")]
 		protected var paneImage:Class;
 		
+		protected var _lastSkillPoints:int = 0;
 		
-		protected var fire:FlxButton;
-		
-		private var _lastSkillPoints:int = 0;
+		protected var state:GameState;
 		
 		public function LevelUpLayer()
 		{
 			super();
 			
-			
-			var state:GameState = FlxG.state as GameState;
+			state = FlxG.state as GameState;
 			
 			var bg:FlxSprite = new FlxSprite(0,0);
 			bg.loadGraphic(backgroundImage);
@@ -53,63 +60,97 @@ package com.smashingwindmills.states.layers
             textSkillPoints.scrollFactor = new Point(0, 0);
             add(textSkillPoints);
             
-
-
-			var fireText:FlxText = new FlxText(0,0,40,"Click");
-			fireText.setFormat(null,12,0xFFAA66,"left");
+            
+            gunsText = new FlxText(0,100,200,"Guns: " + state.player.getSkillById(PlayerHelper.SKILL_GUNS).currentLevel);
+	    	gunsText.setFormat(null, 16, 0x0FFF15, "left");
+            gunsText.scrollFactor = new Point(0, 0);
+                        
+            ammoText = new FlxText(0,140,200,"Ammo: " + state.player.getSkillById(PlayerHelper.SKILL_AMMO).currentLevel);
+            ammoText.setFormat(null, 16, 0x0FFF15, "left");
+            ammoText.scrollFactor = new Point(0, 0);
+            
+            healthText = new FlxText(0,180,200,"Health: "  + state.player.getSkillById(PlayerHelper.SKILL_HEALTH).currentLevel);
+            healthText.setFormat(null, 16, 0x0FFF15, "left");
+            healthText.scrollFactor = new Point(0, 0);
+            
+            add(gunsText);
+            add(ammoText);
+            add(healthText);
+          
+			gunsButton = new FlxButton(0,0,upgradeGuns);
+			gunsButton.loadText(new FlxText(0,0,100,"Upgrade!"));
+			gunsButton.y = 100;
+			gunsButton.x = 100;
+			gunsButton.width = 100;
+			gunsButton.height = 100;
+			gunsButton.scrollFactor = new Point(0,0);
+			add(gunsButton);
 			
-			fire = new FlxButton(0,0,myButtonClick);
-			fire.loadText(fireText);
-			fire.y = 20;
-			fire.x = 20;
-			fire.width = 100;
-			fire.height = 100;
-			fire.scrollFactor = new Point(0,0);
-			add(fire);
-			
-			
+			ammoButton = new FlxButton(0,0,upgradeAmmo);
+			ammoButton.loadText(new FlxText(0,0,100,"Upgrade!"));
+			ammoButton.y = 140;
+			ammoButton.x = 100;
+			ammoButton.width = 100;
+			ammoButton.height = 100;
+			ammoButton.scrollFactor = new Point(0,0);
+			add(ammoButton);
 
+			healthButton = new FlxButton(0,0,upgradeHealth);
+			healthButton.loadText(new FlxText(0,0,100,"Upgrade!"));
+			healthButton.y = 180;
+			healthButton.x = 100;
+			healthButton.width = 100;
+			healthButton.height = 100;
+			healthButton.scrollFactor = new Point(0,0);
+			add(healthButton);
 		}
-		public function myButtonClick():void
+		
+		public function upgradeHealth():void
 		{
-			var state:GameState = FlxG.state as GameState;
-
-			// TODO: this is _very_ temporary. Modifier classes should be attached to an array in weapon called "upgrades", and
-			// the same goes for player. some kind of trees of skills should then be created and map to the various modifiers
-			// that we can add.
-			for (var i:int = 0; i < state.player.weapons.length; i++)
-			{
-				if (state.player.weapons[i] is CorrodeSquirt)
-				{
-					var weapon:BaseWeapon = state.player.weapons[i] as BaseWeapon;
-					weapon.baseDamage = 30;
-					weapon.maxAmmo = 300;
-					weapon.ammo = 300;
-				}
-			}
+			state.player.getSkillById(PlayerHelper.SKILL_HEALTH).currentLevel++;
+			state.player.availableSkillPoints--;
+			healthText.text = "Health: "  + state.player.getSkillById(PlayerHelper.SKILL_HEALTH).currentLevel;
+			checkButtons();
+			state.player.calculateSkills();
+		}
+		
+		public function upgradeAmmo():void
+		{
+			state.player.availableSkillPoints--;	
+			state.player.getSkillById(PlayerHelper.SKILL_AMMO).currentLevel++;	
+			ammoText.text = "Ammo: " + state.player.getSkillById(PlayerHelper.SKILL_AMMO).currentLevel;
+			checkButtons();		
+			state.player.calculateSkills();
+		}
+		
+		public function upgradeGuns():void
+		{
+			state.player.availableSkillPoints--;
+			state.player.getSkillById(PlayerHelper.SKILL_GUNS).currentLevel++;	
+			gunsText.text = "Guns: " + state.player.getSkillById(PlayerHelper.SKILL_GUNS).currentLevel;
+			checkButtons();
+			state.player.calculateSkills();
 		}
 		
 		override public function update():void
 		{
 			super.update();
-
-			var state:GameState = FlxG.state as GameState;
-
-
 			if (_lastSkillPoints != state.player.availableSkillPoints)
 			{
 				_lastSkillPoints = state.player.availableSkillPoints;
 				textSkillPoints.text = "Skill points: " + _lastSkillPoints.toString();
 			}
-			if (FlxG.mouse.justPressed())
-			{
-				trace("scroll " + FlxG.scroll.x + "/" + FlxG.scroll.y);
-				trace("screen " + FlxG.state.x + "/" + FlxG.state.y);
-				trace("layer  " + x + "/" + y);
-				trace("button " + fire.x + "/" + fire.y);
-				trace("mouse  " + FlxG.mouse.x + "/" +FlxG.mouse.y); 
-			}
+			checkButtons();
 		}
-
+		
+		private function checkButtons():void
+		{
+			var enableButtons:Boolean = false;
+			if (state.player.availableSkillPoints > 0)
+			{
+				enableButtons = true;
+			}
+			healthButton.visible = ammoButton.visible = gunsButton.visible = enableButtons;
+		}
 	}
 }

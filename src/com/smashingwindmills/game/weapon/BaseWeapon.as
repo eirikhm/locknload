@@ -8,17 +8,43 @@ package com.smashingwindmills.game.weapon
 	
 	public class BaseWeapon extends FlxSprite
 	{
-		protected var _damageType:String;
-		
 		/**
 		 * Base damage for weapon
 		 */
-		protected var _baseDamage:int;
+		public var baseDamage:Number;
+		
+		public var currentDamage:Number;
 		
 		/**
 		 * Base velocity for bullets
 		 */
-		protected var _baseVelocity:Point = new Point(100,0);
+		public var baseVelocity:Point = new Point(100,0);
+		
+		public var currentVelocity:Point;
+
+		/**
+		 * Max ammo count for weapon. -1 means infinite
+		 */
+		public var baseMaxAmmo:int = -1;
+				
+		/**
+		 * Max ammo count for weapon. -1 means infinite
+		 */
+		public var currentMaxAmmo:int;
+		
+		/**
+		 * Fire Range
+		 * TODO: Create rectangle here
+		 */
+		public var baseRange:Point = new Point(150,150);
+		
+		/**
+		 * Current rage
+		 */
+		public var currentRange:Point;
+
+		
+		
 		
 		/**
 		 * Array of bullets which can exists at one given time.
@@ -35,11 +61,6 @@ package com.smashingwindmills.game.weapon
 		 */
 		protected var _bulletCount:int;
 		
-		/**
-		 * Fire Range
-		 * TODO: Create rectangle here
-		 */
-		protected var _range:Point = new Point(150,150);
 
 		/**
 		 * Type of bullets to use for this weapon
@@ -65,11 +86,7 @@ package com.smashingwindmills.game.weapon
 		 * ammo count for this weapon. if set to -1 the weapon has infinite ammo
 		 */
 		protected var _ammo:int = -1; 
-		
-		/**
-		 * Max ammo count for weapon. -1 means infinite
-		 */
-		protected var _maxAmmo:int = -1;
+
 		
 		/**
 		 * Weapon display name
@@ -81,13 +98,22 @@ package com.smashingwindmills.game.weapon
 			bulletCount = numOfBullets;
 			bullets = new Array();
 			ammo = initialAmmo;
-			maxAmmo = initialMaxAmmo;
+			baseMaxAmmo = initialMaxAmmo;
+		}
+		
+		public function initialize():void
+		{
+			currentDamage = baseDamage;
+			currentMaxAmmo = baseMaxAmmo;
+			currentVelocity = baseVelocity;
+			currentRange = baseRange;
+			buildBullets();
 		}
 		
 		/**
 		 * Build array of bullets and add them to the state
 		 */
-		public function buildBullets():void
+		private function buildBullets():void
 		{
 			var state:FlxState = FlxG.state;
 			for (var i:int = 0; i < bulletCount; i++)
@@ -112,8 +138,7 @@ package com.smashingwindmills.game.weapon
 		{
 			if (ammo == 0)
 			{
-				trace("out of ammo");
-				// show out of ammo text?
+				// TODO: show out of ammo text?
 				return;
 			}
 			else if (ammo > 0)
@@ -129,19 +154,19 @@ package com.smashingwindmills.game.weapon
 			if (equipper.facing == RIGHT)
 			{
 				bX += equipper.width -4;
-				bXVel = baseVelocity.x;
-				bYVel = baseVelocity.y;
+				bXVel = currentVelocity.x;
+				bYVel = currentVelocity.y;
 			}
 			else
 			{
 				bX -= bullets[_currentBullet].width -4;
-				bXVel = -baseVelocity.x;
-				bYVel = baseVelocity.y;
+				bXVel = -currentVelocity.x;
+				bYVel = currentVelocity.y;
 			}
 			
 			// calculate damage for this bullet
 			bullets[_currentBullet].damage = calculateDamange();
-			bullets[_currentBullet].shoot(bX,bY,bXVel,bYVel,range);
+			bullets[_currentBullet].shoot(bX,bY,bXVel,bYVel,currentRange);
 			++_currentBullet;
 			_currentBullet %= bullets.length;
 			
@@ -161,27 +186,7 @@ package com.smashingwindmills.game.weapon
 		
 		public function calculateDamange():Number
 		{
-			return baseDamage;
-		}
-		
-		public function get baseDamage():int
-		{
-			return _baseDamage;
-		}
-		
-		public function set baseDamage(value:int):void
-		{
-			_baseDamage = value;
-		}
-		
-		public function get baseVelocity():Point
-		{
-			return _baseVelocity;
-		}
-		
-		public function set baseVelocity(value:Point):void
-		{
-			_baseVelocity = value;
+			return currentDamage;
 		}
 		
 		public function get bullets():Array
@@ -203,17 +208,7 @@ package com.smashingwindmills.game.weapon
 		{
 			_bulletCount = value;	
 		}
-		
-		public function get range():Point
-		{
-			return _range;	
-		}
-		
-		public function set range(value:Point):void
-		{
-			_range = value;
-		}
-		
+				
 		public function get bulletType():Class
 		{
 			return _bulletType;
@@ -273,14 +268,5 @@ package com.smashingwindmills.game.weapon
 			_name = value;
 		}
 		
-		public function get maxAmmo():int
-		{
-			return _maxAmmo;
-		}
-		
-		public function set maxAmmo(value:int):void
-		{
-			_maxAmmo = value;
-		}
 	}
 }

@@ -298,7 +298,7 @@ package org.flixel
 				} while((_cache[ukey] != undefined) && (_cache[ukey] != null));
 				key = ukey;
 			}
-			_cache[key] = new BitmapData(Width,Height,true,Color);
+			_cache[key] = new BitmapData(Width,Height,false,Color);
 			return _cache[key];
 		}
 		

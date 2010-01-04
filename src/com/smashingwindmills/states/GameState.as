@@ -20,6 +20,7 @@ package com.smashingwindmills.states
 	import org.flixel.FlxLayer;
 	import org.flixel.FlxSprite;
 	import org.flixel.FlxState;
+	import org.flixel.FlxText;
 	
 	public class GameState extends FlxState
 	{
@@ -37,12 +38,15 @@ package com.smashingwindmills.states
         
 		[Embed(source="../media/maps2/mytest.CSV", mimeType="application/octet-stream")]
 		private var mapData:Class;
+		
 		[Embed(source="../media/maps2/Woodland_Tileset.png")]
 		private var tiles:Class;
 
-	// uncomment to embed music.
-	//	[Embed(source="../media/temp/music.mp3")]
-	//	private var bgMusic:Class;
+		[Embed(source="../media/temp/audio/coin.mp3")] 
+		protected var SndLoot:Class;
+		
+		[Embed(source="../media/temp/audio/music.mp3")] 
+		protected var bgMusic:Class;
 	
 	
 		private var _level:BaseMap;
@@ -71,10 +75,10 @@ package com.smashingwindmills.states
 		public function GameState()
 		{
 			player = new Player();
-			var weapon:BaseWeapon = buildWeapon(CorrodeSquirt,7,-1);
+			var weapon:BaseWeapon = buildWeapon(CorrodeSquirt,7,-1,100);
 			
 			player.weapons.push(weapon);
-			player.weapons.push(buildWeapon(FireGattler,4,10));
+			player.weapons.push(buildWeapon(FireGattler,4,10,10));
 			player.currentWeaponIndex = 0;
 			player.health = 100;
 			player.x = 100;
@@ -90,52 +94,55 @@ package com.smashingwindmills.states
 			
 			tempAddEnemies();
 			
-			//Create the map
-		//	_map = new MapSandbox();
-
-			//Add the layers to current the FlxState
-
-			//FlxG.state.add(_map.layerMain);
-		//	_map.addSpritesToLayerMain(onAddSpriteCallback);
-			
 			FlxG.followBounds(level.boundsMinX, level.boundsMinY, level.boundsMaxX, level.boundsMaxY);
 			
 			FlxG.follow(player,2.5);
 			FlxG.followAdjust(0.5,0.0);
 			add(player);
 			
-			// uncomment to play music
-		//	FlxG.playMusic(bgMusic,1);
+			FlxG.playMusic(bgMusic,1);
 			
 			this.add(lyrHUD);
 			this.add(lyrLevelUp);
 		}
 		
-		private function tempAddEnemies():void
+		public function showFloatMessage(text:String, color:uint, ttl:int = 3):void
 		{
-			var turret:Turret = new Turret(200,1044);
-			turret.player = player;
-			turret.initialize();
-			if (turret.weapon)
-			{
-				enemyBullets = enemyBullets.concat(turret.weapon.bullets);
-			}
-			enemies.push(turret);
-			FlxG.state.add(turret);
-			
+			var txt:FlxText = new FlxText(player.x,player.y,200,text);
+			txt.velocity.y = -100;
+			txt.color = color;
+			add(txt);
 		}
 		
-		private function buildWeapon(weaponClass:Class,bulletCount:int = 5, ammo:int = -1):BaseWeapon
+		private function tempAddEnemies():void
+		{
+			for (var i:int = 0; i < 5; i++)
+			{
+				var turret:Turret = new Turret(200  + (i*32),1044);
+				turret.player = player;
+				turret.initialize();
+				if (turret.weapon)
+				{
+					enemyBullets = enemyBullets.concat(turret.weapon.bullets);
+				}
+				enemies.push(turret);
+				FlxG.state.add(turret);
+			}
+		}
+		
+		private function buildWeapon(weaponClass:Class,bulletCount:int = 5, ammo:int = -1,maxAmmo:int = -1):BaseWeapon
 		{
 			var weapon:BaseWeapon = new weaponClass(6);
-			weapon.buildBullets();
 			weapon.ammo = ammo;
 			weapon.bulletCount = bulletCount;
+			weapon.baseMaxAmmo = maxAmmo;
+			weapon.initialize();
 			return weapon;
 		}
 
 		protected function onAddSpriteCallback(obj:FlxSprite):void
 		{
+			// TODO: this should check for inheritance, not direct 
 			// pass in a reference to the player
 			if (obj is Turret || obj is Tank)
 			{
@@ -201,9 +208,12 @@ package com.smashingwindmills.states
 		
 		private function playerPickupLoot(loot:FlxSprite,p:FlxSprite):void
 		{
+			// move this playback to somewhere else? Player should pick up loot, not the other way arround,
+			FlxG.play(SndLoot);
 			var item:BaseItem = loot as BaseItem;
 			item.aquireLoot(player);
 			loot.kill();
+			
 		}
 		
 		private function bulletHitPlayer(bullet:FlxSprite,p:FlxSprite):void
